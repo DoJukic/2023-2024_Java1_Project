@@ -64,7 +64,6 @@ create or alter proc [createBlogpost]
 )
 as
 begin
-	-- "The pre-collapse manuals say always do this. [...] No, no. I don't know why."
 	-- Minor performance boost basically, at least according to the docs
 	-- Not really necessary though
 	set NOCOUNT on
@@ -152,5 +151,63 @@ begin
 	select cat.Name as 'CategoryName' from [Category] as cat
 	inner join [BlogpostCategoryLink] as link on link.CategoryID = cat.IDCategory
 	where link.BlogpostID = @BlogpostID
+end
+go
+
+-- ************************************************ Blogpost [U]pdate /  Edit ************************************************
+create or alter proc [updateBlogpostAndFlushCategories]
+(
+	@BlogpostID int,
+	@Title nvarchar(max),
+    @Link nvarchar(max),
+	@DatePublishedStr nvarchar(max),
+    @Description nvarchar(max),
+    @EncodedContent nvarchar(max),
+    @ImagePath nvarchar(max)
+)
+as
+begin
+	update [Blogpost]
+	set
+		[Title] = @Title,
+		[Link] = @Link,
+		[DatePublished] = cast(@DatePublishedStr as datetimeoffset),
+		[Description] = @Description,
+		[EncodedContent] = @EncodedContent,
+		[ImagePath] = @ImagePath
+	where [IDBlogpost] = @BlogpostID
+
+	delete from [BlogpostCategoryLink]
+	where [BlogpostID] = @BlogpostID
+
+	delete from [Category]
+	where [IDCategory] not in (select [CategoryID] from [BlogpostCategoryLink])
+end
+go
+
+-- ************************************************ Blogpost [D]elete ************************************************
+create or alter proc [deleteBlogpost]
+(
+	@BlogpostID int
+)
+as
+begin
+	delete from [BlogpostCategoryLink]
+	where [BlogpostID] = @BlogpostID
+	
+	delete from [Blogpost]
+	where [IDBlogpost] = @BlogpostID
+
+	delete from [Category]
+	where [IDCategory] not in (select [CategoryID] from [BlogpostCategoryLink])
+end
+go
+
+create or alter proc [deleteAllBlogpostData]
+as
+begin
+	delete from [BlogpostCategoryLink]
+	delete from [Blogpost]
+	delete from [Category]
 end
 go

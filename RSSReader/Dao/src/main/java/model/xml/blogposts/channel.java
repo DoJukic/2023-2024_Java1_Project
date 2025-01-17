@@ -11,5 +11,5 @@ import java.util.List;
  * @author Domi
  */
 public class channel {
-    List<item> item;
+    public List<item> item;
 }

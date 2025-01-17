@@ -17,8 +17,9 @@ import model.repo.user.User;
 public interface IRepository {
     int createBlogpost(Blogpost blogpost) throws Exception;
     void createBlogposts(List<Blogpost> blogposts) throws Exception;
-    void updateBlogpost(int id, Blogpost blogpost) throws Exception;
+    void updateBlogpost(Blogpost blogpost) throws Exception;
     void deleteBlogpost(int id) throws Exception;
+    void deleteAllBlogpostData() throws Exception;
     Optional<Blogpost> selectBlogpost(int id) throws Exception;
     List<Blogpost> selectBlogpostsNoCategory() throws Exception;
     

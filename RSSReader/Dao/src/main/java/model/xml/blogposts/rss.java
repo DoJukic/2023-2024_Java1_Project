@@ -12,5 +12,5 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="rss")
 public class rss {
-    channel channel;
+    public channel channel;
 }

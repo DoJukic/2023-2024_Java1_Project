@@ -7,6 +7,7 @@ package hr.algebra.rss_gui;
 import dal.IRepository;
 import dal.RepositoryFactory;
 import hr.algebra.rss_gui.view.BlogpostSelectJPanel;
+import hr.algebra.utilities.SynchronousAsynchronousWorker;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,6 +19,16 @@ import model.repo.blogpost.Category;
  * @author Domi
  */
 public class RSS_GUI extends javax.swing.JFrame {
+    
+    private static RSS_GUI current;
+    
+    public static final String dateFormat = "yyyy-mm-dd";
+    
+    public final SynchronousAsynchronousWorker SyncAsyncWorker = new SynchronousAsynchronousWorker();
+    
+    public static RSS_GUI getSingleton(){
+        return current;
+    }
 
     /**
      * Creates new form RSS_GUI
@@ -25,9 +36,12 @@ public class RSS_GUI extends javax.swing.JFrame {
     public RSS_GUI() {
         initComponents();
         
+        current = this;
+        
         jtpMain.addTab("Data Select", new BlogpostSelectJPanel());
         
-        /*test code*/{
+        /*test code*/
+        {
         /*IRepository testRepo = RepositoryFactory.getInstance();
         
         var dummyBlogpost = new Blogpost();
@@ -78,8 +92,9 @@ public class RSS_GUI extends javax.swing.JFrame {
         jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(600, 400));
 
-        jtpMain.setMinimumSize(new java.awt.Dimension(600, 400));
+        jtpMain.setMinimumSize(new java.awt.Dimension(0, 0));
 
         jMenu1.setText("File");
         jMenuBarMain.add(jMenu1);

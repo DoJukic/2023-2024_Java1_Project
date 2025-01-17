@@ -27,7 +27,6 @@ public class SqlRepository implements IRepository {
     private static final String TITLE = "Title";
     private static final String LINK = "Link";
     private static final String DATE_PUBLISHED_STRING = "DatePublishedStr";
-    private static final String DATE_PUBLISHED = "DatePublished";
     private static final String DESCRIPTION = "Description";
     private static final String ENCODED_CONTENT = "EncodedContent";
     private static final String IMAGE_PATH = "ImagePath";
@@ -36,12 +35,15 @@ public class SqlRepository implements IRepository {
 
     private static final String CREATE_BLOGPOST = "{ CALL createBlogpost (?,?,?,?,?,?,?) }";
     private static final String LINK_BLOGPOST_TO_CATEGORY = "{ CALL linkBlogpostToCategory (?,?) }";
-    private static final String SELECT_BLOGPOSTS = "{ CALL selectBlogposts }";
+    
     private static final String SELECT_BLOGPOST = "{ CALL selectBlogpost (?) }";
     private static final String SELECT_BLOGPOST_CATEGORIES = "{ CALL selectBlogpostCategories (?) }";
+    private static final String SELECT_BLOGPOSTS = "{ CALL selectBlogposts }";
     
-    private static final String UPDATE_ARTICLE = "{ CALL updateArticle (?,?,?,?,?,?) }";
-    private static final String DELETE_ARTICLE = "{ CALL deleteArticle (?) }";
+    private static final String DELETE_BLOGPOST = "{ CALL deleteBlogpost (?) }";
+    private static final String DELETE_All_BLOGPOST_DATA = "{ CALL deleteAllBlogpostData }";
+    
+    private static final String UPDATE_BLOGPOST_FLUSH_CATEGORIES = "{ CALL updateBlogpostAndFlushCategories (?,?,?,?,?,?,?) }";
 
     private int createBlogpostViaConnection(Connection con, Blogpost blogpost) throws Exception{
         int returnInt;
@@ -60,22 +62,24 @@ public class SqlRepository implements IRepository {
             stmt.registerOutParameter(BLOGPOST_ID, Types.INTEGER);
             stmt.executeUpdate();
 
-            // TODO: LINK TO CATEGORIES
-
             returnInt = stmt.getInt(BLOGPOST_ID);
         }
-            
-        if (blogpost.categories.isPresent()){
+        
+        linkBlogpostToCategories(con, blogpost, returnInt);
+        
+        return returnInt;
+    }
+    
+    private void linkBlogpostToCategories(Connection con, Blogpost blogpost, int blogpostID) throws Exception{
+        if (blogpost.categories.isPresent() && !blogpost.categories.get().isEmpty()){
             try(CallableStatement stmt = con.prepareCall(LINK_BLOGPOST_TO_CATEGORY)) {
                 for (var cat : blogpost.categories.get()){
-                    stmt.setInt(BLOGPOST_ID, returnInt);
+                    stmt.setInt(BLOGPOST_ID, blogpostID);
                     stmt.setString(CATEGORY_NAME, cat.name);
                     stmt.executeUpdate();
                 }
             }
         }
-        
-        return returnInt;
     }
     
     @Override
@@ -99,13 +103,47 @@ public class SqlRepository implements IRepository {
     }
 
     @Override
-    public void updateBlogpost(int id, Blogpost blogpost) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void updateBlogpost(Blogpost blogpost) throws Exception {
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();) {
+            try(CallableStatement stmt = con.prepareCall(UPDATE_BLOGPOST_FLUSH_CATEGORIES)) {
+                
+                stmt.setInt(BLOGPOST_ID, blogpost.id);
+                stmt.setString(TITLE, blogpost.title);
+                stmt.setString(LINK, blogpost.link);
+                stmt.setString(DATE_PUBLISHED_STRING, blogpost.datePublished
+                        .format(Blogpost.DATE_OFFSET_FORMATTER));
+                stmt.setString(DESCRIPTION, blogpost.description);
+                stmt.setString(ENCODED_CONTENT, blogpost.encodedContent);
+
+                stmt.setString(IMAGE_PATH, blogpost.imagePath);
+
+                stmt.registerOutParameter(BLOGPOST_ID, Types.INTEGER);
+                stmt.executeUpdate();
+            }
+        
+            linkBlogpostToCategories(con, blogpost, blogpost.id);
+        }
     }
 
     @Override
     public void deleteBlogpost(int id) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();) {
+            try(CallableStatement stmt = con.prepareCall(DELETE_BLOGPOST)) {
+                stmt.setInt(BLOGPOST_ID, id);
+                stmt.executeUpdate();
+            }
+        }
+    }
+    
+    public void deleteAllBlogpostData() throws Exception {
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();) {
+            try(CallableStatement stmt = con.prepareCall(DELETE_All_BLOGPOST_DATA)) {
+                stmt.executeUpdate();
+            }
+        }
     }
     
     private Blogpost loadBlogpostFromResultSet(ResultSet rs) throws SQLException{

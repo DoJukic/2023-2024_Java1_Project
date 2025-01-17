@@ -6,6 +6,7 @@ package hr.algebra.utilities;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  *
@@ -25,8 +26,8 @@ public class SynchronousAsynchronousWorker {
     
     private final Object operationsLock = new Object();
     
-    private final CompletableFuture worker = new CompletableFuture();
-    private ArrayList<Runnable> todo;
+    private ArrayList<Runnable> todo = new ArrayList<>();
+    private Boolean operationsRunning = false;
     
     private final ArrayList<TaskStartedListener> taskStartedListeners = new ArrayList<>();
     
@@ -66,9 +67,21 @@ public class SynchronousAsynchronousWorker {
     
     private void checkState(){
         synchronized(operationsLock){
-            if (worker.isDone()){
-                worker.thenRunAsync(todo.getLast()).thenRunAsync(() -> {taskFinished();});
-                todo.removeLast();
+            if (!operationsRunning){
+                tryRunNextTask();
+            }
+        }
+    }
+    
+    private void tryRunNextTask(){
+        synchronized(operationsLock){
+            if (!todo.isEmpty()){
+                var task = todo.getFirst();
+                ForkJoinPool.commonPool().execute(() ->{
+                    task.run();
+                    taskFinished();
+                });
+                todo.removeFirst();
                 taskStarted();
             }
         }
@@ -76,12 +89,14 @@ public class SynchronousAsynchronousWorker {
     
     public Boolean getAllTasksFinished(){
         synchronized(operationsLock){
-            return (worker.isDone() && todo.isEmpty());
+            return (!operationsRunning && todo.isEmpty());
         }
     }
     
     private void taskStarted(){
         synchronized(operationsLock){
+            operationsRunning = true;
+            
             for (var listener : taskStartedListeners){
                 listener.notifiedTaskStarted();
             }
@@ -90,6 +105,8 @@ public class SynchronousAsynchronousWorker {
     
     private void taskFinished(){
         synchronized(operationsLock){
+            operationsRunning = false;
+            
             for (var listener : oneTaskCompleteListeners){
                 listener.notifiedTaskComplete();
             }
@@ -99,7 +116,7 @@ public class SynchronousAsynchronousWorker {
                     listener.notifiedTasksComplete();
                 }
             }else{
-                checkState();
+                tryRunNextTask();
             }
         }
     }

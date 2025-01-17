@@ -4,7 +4,6 @@
  */
 package model.xml.blogposts;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -22,7 +21,7 @@ public class item {
     @XmlElement
     public String link;
     @XmlElement
-    public OffsetDateTime pubDate;
+    public String pubDate;
     @XmlElement
     public List<String> category;
     @XmlElement
