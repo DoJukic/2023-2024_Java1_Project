@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 import model.repo.blogpost.Blogpost;
 import model.repo.blogpost.Category;
 import model.repo.user.Login;
-import model.repo.user.User;
+import model.repo.user.UserInfo;
 
 /**
  *
@@ -41,9 +41,19 @@ public class SqlRepository implements IRepository {
     private static final String SELECT_BLOGPOSTS = "{ CALL selectBlogposts }";
     
     private static final String DELETE_BLOGPOST = "{ CALL deleteBlogpost (?) }";
-    private static final String DELETE_All_BLOGPOST_DATA = "{ CALL deleteAllBlogpostData }";
+    private static final String DELETE_ALL_BLOGPOST_DATA = "{ CALL deleteAllBlogpostData }";
     
     private static final String UPDATE_BLOGPOST_FLUSH_CATEGORIES = "{ CALL updateBlogpostAndFlushCategories (?,?,?,?,?,?,?) }";
+    
+    // Login
+    private static final String LOGIN_ALIAS = "Alias";
+    private static final String LOGIN_PASSWORD_PLAIN = "PasswordPlain";
+    private static final String LOGIN_EXISTS = "Exists";
+    private static final String LOGIN_IS_ADMIN = "IsAdmin";
+    private static final String LOGIN_SUCCESS = "Success";
+    
+    private static final String TRY_LOG_IN = "{ CALL tryLogIn (?,?,?,?) }";
+    private static final String TRY_REGISTER = "{ CALL tryRegister (?,?,?) }";
 
     private int createBlogpostViaConnection(Connection con, Blogpost blogpost) throws Exception{
         int returnInt;
@@ -140,7 +150,7 @@ public class SqlRepository implements IRepository {
     public void deleteAllBlogpostData() throws Exception {
         DataSource dataSource = DataSourceSingleton.getInstance();
         try(Connection con = dataSource.getConnection();) {
-            try(CallableStatement stmt = con.prepareCall(DELETE_All_BLOGPOST_DATA)) {
+            try(CallableStatement stmt = con.prepareCall(DELETE_ALL_BLOGPOST_DATA)) {
                 stmt.executeUpdate();
             }
         }
@@ -217,13 +227,43 @@ public class SqlRepository implements IRepository {
     
 
     @Override
-    public int createUser(Login login, User user) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public boolean tryRegister(Login login) throws Exception {
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();) {
+            try(CallableStatement stmt = con.prepareCall(TRY_REGISTER)) {
+                stmt.setString(LOGIN_ALIAS, login.alias);
+                stmt.setString(LOGIN_PASSWORD_PLAIN, login.password);
+                
+                stmt.registerOutParameter(LOGIN_SUCCESS, Types.BOOLEAN);
+                stmt.executeUpdate();
+
+                return stmt.getBoolean(LOGIN_SUCCESS);
+            }
+        }
     }
 
     @Override
-    public Optional<User> attemptLogin(Login login) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Optional<UserInfo> tryLogin(Login login) throws Exception {
+        UserInfo userInfo = new UserInfo();
+        
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();) {
+            try(CallableStatement stmt = con.prepareCall(TRY_LOG_IN)) {
+                stmt.setString(LOGIN_ALIAS, login.alias);
+                stmt.setString(LOGIN_PASSWORD_PLAIN, login.password);
+                
+                stmt.registerOutParameter(LOGIN_EXISTS, Types.BOOLEAN);
+                stmt.registerOutParameter(LOGIN_IS_ADMIN, Types.BOOLEAN);
+                stmt.executeUpdate();
+                
+                if (stmt.getBoolean(LOGIN_EXISTS)){
+                    userInfo.admin = stmt.getBoolean(LOGIN_IS_ADMIN);
+                    return Optional.of(userInfo);
+                }
+            }
+        }
+        
+        return Optional.empty();
     }
 
 }

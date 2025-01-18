@@ -26,6 +26,10 @@ public class BlogpostTableModel extends AbstractTableModel{
         "ImagePath"
     };
     
+    public Blogpost getTheActualThingyPls(int i){
+        return blogposts.get(i);
+    }
+    
     private List<Blogpost> blogposts;
 
     public BlogpostTableModel(List<Blogpost> blogposts) {

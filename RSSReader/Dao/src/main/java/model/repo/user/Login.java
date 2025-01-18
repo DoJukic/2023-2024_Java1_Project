@@ -9,6 +9,7 @@ package model.repo.user;
  * @author Domi
  */
 public class Login {
-    String email;
-    String password;
+    public String alias;
+    public String password;
+    Boolean admin;
 }

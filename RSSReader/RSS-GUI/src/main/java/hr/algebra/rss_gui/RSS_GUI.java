@@ -7,12 +7,23 @@ package hr.algebra.rss_gui;
 import dal.IRepository;
 import dal.RepositoryFactory;
 import hr.algebra.rss_gui.view.BlogpostSelectJPanel;
+import hr.algebra.rss_gui.view.DataEditJPanel;
+import hr.algebra.rss_gui.view.DataViewJPanel;
+import hr.algebra.rss_gui.view.LoginJPanel;
+import hr.algebra.rss_gui.view.RegisterJPanel;
+import hr.algebra.utilities.MessageUtils;
 import hr.algebra.utilities.SynchronousAsynchronousWorker;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import model.repo.blogpost.Blogpost;
 import model.repo.blogpost.Category;
+import model.repo.user.Login;
+import model.repo.user.UserInfo;
 
 /**
  *
@@ -20,15 +31,19 @@ import model.repo.blogpost.Category;
  */
 public class RSS_GUI extends javax.swing.JFrame {
     
-    private static RSS_GUI current;
-    
-    public static final String dateFormat = "yyyy-mm-dd";
+    public static final String DATE_FORMAT = "yyyy-mm-dd";
     
     public final SynchronousAsynchronousWorker SyncAsyncWorker = new SynchronousAsynchronousWorker();
     
-    public static RSS_GUI getSingleton(){
-        return current;
-    }
+    LoginJPanel loginPanel = new LoginJPanel(this);
+    RegisterJPanel registerPanel = new RegisterJPanel(this);
+    private boolean registerVisible = false;
+    BlogpostSelectJPanel dataSelectPanel = new BlogpostSelectJPanel(this);
+    private boolean dataSelectVisible = false;
+    DataViewJPanel dataViewPanel = new DataViewJPanel();
+    private boolean dataViewVisible = false;
+    DataEditJPanel dataEditPanel = new DataEditJPanel();
+    private boolean dataEditVisible = false;
 
     /**
      * Creates new form RSS_GUI
@@ -36,45 +51,76 @@ public class RSS_GUI extends javax.swing.JFrame {
     public RSS_GUI() {
         initComponents();
         
-        current = this;
+        rebuildTabs();
+    }
+    
+    public void rebuildTabs(){
+        // https://stackoverflow.com/questions/1013479/after-calling-jtabbedpane-removeall-the-jtabbedpane-still-has-x-number-of-tab
+        while (jtpMain.getTabCount() > 0)
+            jtpMain.remove(0);
         
-        jtpMain.addTab("Data Select", new BlogpostSelectJPanel());
-        
-        /*test code*/
-        {
-        /*IRepository testRepo = RepositoryFactory.getInstance();
-        
-        var dummyBlogpost = new Blogpost();
-        
-        dummyBlogpost.title = "TestTitle";
-        dummyBlogpost.link = "TestLink";
-        dummyBlogpost.datePublished = OffsetDateTime.parse("Fri, 20 Dec 2024 21:12:23 +0000", DateTimeFormatter.RFC_1123_DATE_TIME);
-        
-        dummyBlogpost.description = "TestDesc";
-        dummyBlogpost.encodedContent = "TestContent";
-        
-        dummyBlogpost.imagePath = "TEST_PATH";
-        
-        dummyBlogpost.categories = new ArrayList<Category>();
-        
-        var cat1 = new Category();
-        cat1.name = "CAT ONE";
-        dummyBlogpost.categories.add(cat1);
-        
-        var cat2 = new Category();
-        cat2.name = "MEOW MEOW";
-        dummyBlogpost.categories.add(cat2);
-        
-        int id = 0;
-        
-        try {
-            id = testRepo.createBlogpost(dummyBlogpost);
-        } catch (Exception e) {
-            var msg = e.getMessage();
+        jtpMain.addTab("Log In", loginPanel);
+        if (registerVisible){
+            jtpMain.addTab("Register", registerPanel);
         }
         
-        cat2.name = "MEOW MEOW " + id;*/
+        if (dataSelectVisible){
+            jtpMain.addTab("Data Select", dataSelectPanel);
+            if (dataViewVisible){
+                jtpMain.addTab("View Data", dataViewPanel);
+                if (dataEditVisible){
+                    jtpMain.addTab("Edit Data", dataEditPanel);
+                }
+            }
         }
+    }
+    
+    public void loginLogInAttempt(Login login){
+        SyncAsyncWorker.addTask(() -> {
+            IRepository repository = RepositoryFactory.getInstance();
+            try {
+                Optional<UserInfo> loginResult = repository.tryLogin(login);
+                
+                if (loginResult.isPresent()){
+                    SwingUtilities.invokeLater(() ->{
+                        dataSelectVisible = true;
+                        
+                        // TODO: ADMIN STUFF
+                        
+                        rebuildTabs();
+                    });
+                }else{
+                    SwingUtilities.invokeLater(() ->{
+                        MessageUtils.showErrorMessage("Login Failed", "Wrong alias or password.");
+                    });
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
+                
+                SwingUtilities.invokeLater(() ->{
+                    MessageUtils.showErrorMessage("Login Failed", "Database fault :(");
+                });
+            }
+        });
+    }
+    
+    public void showRegister(){
+        registerVisible = true;
+        rebuildTabs();
+        jtpMain.setSelectedComponent(registerPanel);
+    }
+    
+    public void hideRegister(){
+        registerVisible = false;
+        rebuildTabs();
+    }
+    
+    public Boolean registerRegisterAttempt(Login login){
+        return false;
+    }
+    
+    public void blogpostSelectBlogpostSelectedView(Blogpost blogpost){
+        MessageUtils.showInformationMessage("SELECTION!", blogpost.title);
     }
 
     /**
@@ -92,6 +138,7 @@ public class RSS_GUI extends javax.swing.JFrame {
         jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Starsector Blog RSS Parser");
         setMinimumSize(new java.awt.Dimension(600, 400));
 
         jtpMain.setMinimumSize(new java.awt.Dimension(0, 0));

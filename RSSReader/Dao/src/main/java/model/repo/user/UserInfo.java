@@ -8,7 +8,6 @@ package model.repo.user;
  *
  * @author Domi
  */
-public class User {
-    String alias;
-    Boolean admin;
+public class UserInfo {
+    public Boolean admin = false;
 }

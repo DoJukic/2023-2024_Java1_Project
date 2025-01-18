@@ -109,5 +109,26 @@ public class FileUtils {
         }
         return Optional.empty();
     }
-
+    
+    public static boolean tryDeleteDir(File file) {
+        try{
+            deleteDir(file);
+        }catch (Exception ex){
+            return false;
+        }
+        return true;
+    }
+    
+    // https://stackoverflow.com/questions/20281835/how-to-delete-a-folder-with-files-using-java - Learman's answer. Not the best but it will do for 99.99% of use cases.
+    public static void deleteDir(File file){
+        File[] contents = file.listFiles();
+            if (contents != null) {
+                for (File f : contents) {
+                    if (! Files.isSymbolicLink(f.toPath())) {
+                        deleteDir(f);
+                    }
+                }
+            }
+            file.delete();
+    }
 }

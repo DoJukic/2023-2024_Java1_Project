@@ -17,9 +17,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -46,47 +47,42 @@ import org.xml.sax.InputSource;
  * @author Domi
  */
 public class BlogpostSelectJPanel extends javax.swing.JPanel {
-    public static final String imageExtension = "jpg";
-    public static final String imageDirectory = "Images";
+    public static final String IMAGE_EXTENSION = "jpg";
+    public static final String IMAGE_DIRECTORY = "Images";
+    public static final String DEFAULT_IMAGE_LINK = "https://fractalsoftworks.com/wp-content/uploads/2017/06/comsec_redacted.jpg";
+    public static final String DEFAULT_IMAGE_NAME = "_default_image";
+    
+    private final RSS_GUI parentForm;
+    private long jTableBlogpostDisplayLastMouseClicked = 0;
 
     /**
      * Creates new form DataSourceSelectJPanel
      */
-    public BlogpostSelectJPanel() {
+    public BlogpostSelectJPanel(RSS_GUI parent) {
+        this.parentForm = parent;
         initComponents();
-        BlogpostTableModel model = new BlogpostTableModel(new ArrayList<Blogpost>());
         
-        RSS_GUI mainForm = RSS_GUI.getSingleton();
+        setEmptyModel();
         
-        mainForm.SyncAsyncWorker.subscribeToTaskEnded_ThreadWarn(() -> {
+        parentForm.SyncAsyncWorker.subscribeToTaskEnded_ThreadWarn(() -> {
             SwingUtilities.invokeLater(() ->{
                 lblWorkerStatus.setText("");
             });
         });
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
+        parentForm.SyncAsyncWorker.addTask(() -> {
             asyncLoadDataFromDB();
         });
         
         jTableBlogpostDisplay.setAutoCreateRowSorter(true);
-        
-        /*test code*/
-        {
-            /*IRepository testRepo = RepositoryFactory.getInstance();
-            List<Blogpost> posts = null;
-            try {
-                posts = testRepo.selectBlogpostsNoCategory();
-            } catch (Exception ex) {
-                Logger.getLogger(BlogpostSelectJPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            if (posts == null){
-                int i = posts.size();
-            }*/
-        }
     }
     
-    public final void asyncLoadDataFromDB(){
+    private void setEmptyModel(){
+        BlogpostTableModel model = new BlogpostTableModel(new ArrayList<Blogpost>());
+        this.jTableBlogpostDisplay.setModel(model);
+    }
+    
+    public void asyncLoadDataFromDB(){
         SwingUtilities.invokeLater(() ->{
             lblWorkerStatus.setText("Loading data from database...");
         });
@@ -105,20 +101,23 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         }
     }
     
-    public final void loadDataFromWeb(){
-        RSS_GUI mainForm = RSS_GUI.getSingleton();
+    public void loadDataFromWeb(){
+        parentForm.SyncAsyncWorker.cancelNonRunningTasks();
         
-        mainForm.SyncAsyncWorker.cancelNonRunningTasks();
-        
-        if (!mainForm.SyncAsyncWorker.getAllTasksFinished()){
+        if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
             MessageUtils.showInformationMessage("Notice", "The program is still processing, please hold.");
         }
         
         ArrayList<link> links = new ArrayList<>();
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
+        parentForm.SyncAsyncWorker.addTask(() -> {
             SwingUtilities.invokeLater(() ->{
                 lblWorkerStatus.setText("Clearing repository...");
+                setEmptyModel();
+                
+                if (!FileUtils.tryDeleteDir(new File(IMAGE_DIRECTORY))){
+                    MessageUtils.showErrorMessage("Alert", "Could not delete images.");
+                }
             });
             
             IRepository repo = RepositoryFactory.getInstance();
@@ -126,7 +125,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 repo.deleteAllBlogpostData();
             } catch (Exception ex) {
                 Logger.getLogger(BlogpostSelectJPanel.class.getName()).log(Level.SEVERE, null, ex);
-                mainForm.SyncAsyncWorker.cancelNonRunningTasks();
+                parentForm.SyncAsyncWorker.cancelNonRunningTasks();
             
                 SwingUtilities.invokeLater(() ->{
                     MessageUtils.showErrorMessage("Alert", "Could not flush repository.");
@@ -134,28 +133,24 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             }
         });
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
-            SwingUtilities.invokeLater(() ->{
-                this.asyncLoadDataFromDB(); // Imma be honest this is literally the wild west and the worker is optional, better safe than sorry
-            });
+        parentForm.SyncAsyncWorker.addTask(() -> {
+            this.asyncLoadDataFromDB();
         });
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
+        parentForm.SyncAsyncWorker.addTask(() -> {
             this.asyncFetchAllPossibleFeeds(links);
         });
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
+        parentForm.SyncAsyncWorker.addTask(() -> {
             this.asyncLoadProvidedFeeds(links);
         });
         
-        mainForm.SyncAsyncWorker.addTask(() -> {
-            SwingUtilities.invokeLater(() ->{
-                this.asyncLoadDataFromDB();
-            });
+        parentForm.SyncAsyncWorker.addTask(() -> {
+            this.asyncLoadDataFromDB();
         });
     }
     
-    private final void asyncFetchAllPossibleFeeds(List<link> links){
+    private void asyncFetchAllPossibleFeeds(List<link> links){
         SwingUtilities.invokeLater(() ->{
             lblWorkerStatus.setText("Fetching archives...");
         });
@@ -195,7 +190,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         }
     }
     
-    private final void asyncLoadProvidedFeeds(List<link> links){
+    private void asyncLoadProvidedFeeds(List<link> links){
         try{
             // https://stackoverflow.com/questions/9909465/how-to-disable-dtd-fetching-using-jaxb2-0 (Graham Leggett's answer)
             SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -207,6 +202,9 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             ArrayList<Blogpost> blogpostsArr = new ArrayList<>();
 
             var linksReversed = links.reversed();
+            
+            String defaultImageDir =  IMAGE_DIRECTORY + File.separator + DEFAULT_IMAGE_NAME + "." + IMAGE_EXTENSION;
+            FileUtils.copyFromUrl("https://fractalsoftworks.com/wp-content/uploads/2017/06/comsec_redacted.jpg", defaultImageDir);
             
             for (int i = 0; i < linksReversed.size(); i++){
                 var link = linksReversed.get(i);
@@ -244,22 +242,18 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                             bp.categories.get().add(category);
                         }
                         
-                        Pattern pattern = Pattern.compile("(?<=src=\")(.*?)." + imageExtension + "(?=\")");
+                        Pattern pattern = Pattern.compile("(?<=src=\")(.*?)." + IMAGE_EXTENSION + "(?=\")");
 
                         Matcher matcher = pattern.matcher(item.contentEncoded);
                         
-                        String imageURL;
                         if (!matcher.find()){
-                            imageURL = "https://fractalsoftworks.com/wp-content/uploads/2017/06/comsec_redacted.jpg";
+                            bp.imagePath = defaultImageDir;
                         }else{
-                            imageURL = matcher.group(0);
+                            String imageURL = matcher.group(0);
+                            UUID uuid = UUID.randomUUID();
+                            bp.imagePath = IMAGE_DIRECTORY + File.separator + uuid.toString() + "." + IMAGE_EXTENSION;
+                            FileUtils.copyFromUrl(imageURL, bp.imagePath);
                         }
-
-                        UUID uuid = UUID.randomUUID();
-                        
-                        bp.imagePath = imageDirectory + File.separator + uuid.toString() + "." + imageExtension;
-                        
-                        FileUtils.copyFromUrl(imageURL, bp.imagePath);
                         
                         blogpostsArr.add(bp);
                     }
@@ -274,6 +268,16 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 MessageUtils.showErrorMessage("Alert", "Could not load provided feeds.");
             });
         }
+    }
+
+    private void jTableBlogpostDisplaySelectedConfirmed(){
+        int selectedIndex = jTableBlogpostDisplay.getSelectedRow();
+        if (selectedIndex < 0){
+            return;
+        }
+        BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();
+        
+        parentForm.blogpostSelectBlogpostSelectedView(model.getTheActualThingyPls(selectedIndex));
     }
 
     /**
@@ -304,9 +308,19 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             }
         ));
         jTableBlogpostDisplay.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTableBlogpostDisplay.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableBlogpostDisplayMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableBlogpostDisplay);
 
         jbtnConfirmSelection.setText("Confirm Selection");
+        jbtnConfirmSelection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnConfirmSelectionActionPerformed(evt);
+            }
+        });
 
         jbtnFetchNew.setText("Clear And Fetch From Web");
         jbtnFetchNew.addActionListener(new java.awt.event.ActionListener() {
@@ -364,6 +378,20 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     private void jbtnFetchNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnFetchNewActionPerformed
         loadDataFromWeb();
     }//GEN-LAST:event_jbtnFetchNewActionPerformed
+
+    private void jTableBlogpostDisplayMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableBlogpostDisplayMouseClicked
+        long now = Instant.now().toEpochMilli();
+        
+        if (now - jTableBlogpostDisplayLastMouseClicked > 400){
+            jTableBlogpostDisplayLastMouseClicked = now;
+        }else{
+            jTableBlogpostDisplaySelectedConfirmed();
+        }
+    }//GEN-LAST:event_jTableBlogpostDisplayMouseClicked
+
+    private void jbtnConfirmSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnConfirmSelectionActionPerformed
+        jTableBlogpostDisplaySelectedConfirmed();
+    }//GEN-LAST:event_jbtnConfirmSelectionActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

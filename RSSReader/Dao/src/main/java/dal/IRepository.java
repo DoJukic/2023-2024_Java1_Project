@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import model.repo.blogpost.Blogpost;
 import model.repo.user.Login;
-import model.repo.user.User;
+import model.repo.user.UserInfo;
 
 /**
  *
@@ -23,6 +23,6 @@ public interface IRepository {
     Optional<Blogpost> selectBlogpost(int id) throws Exception;
     List<Blogpost> selectBlogpostsNoCategory() throws Exception;
     
-    int createUser(Login login, User user) throws Exception;
-    Optional<User> attemptLogin(Login login) throws Exception;
+    boolean tryRegister(Login login) throws Exception;
+    Optional<UserInfo> tryLogin(Login login) throws Exception;
 }

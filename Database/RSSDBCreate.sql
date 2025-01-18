@@ -1,25 +1,17 @@
 use StarsectorBlogpostRSSDB
 
-create table [User]
-(
-    [IDUser]		int				identity,		constraint [User_PK] primary key ([IDUser]),
-	[Alias]			nvarchar(max)	not null,
-);
-go
-
 CREATE TABLE [Login]
 (
 	[IDLogin]		int				identity,		constraint [Login_PK] primary key ([IDLogin]),
-	[Email]			nvarchar(max)	not null,
+	[Alias]			nvarchar(max)	not null,
     [PasswordPlain]	nvarchar(max)	not null,
-    [UserID]		int				not null,		constraint [Login_User_FK] foreign key ([UserID]) references [User]([IDUser]),
 );
 go
 
 create table [Administrator]
 (
-    [UserID]		int				not null,		constraint [Administrator_PK] primary key ([UserID]),
-													constraint [Administrator_User_FK] foreign key ([UserID]) references [User]([IDUser]),
+    [LoginID]		int				not null,		constraint [Administrator_PK] primary key ([LoginID]),
+													constraint [Administrator_Login_FK] foreign key ([LoginID]) references [Login]([IDLogin]),
 );
 go
 
@@ -209,5 +201,61 @@ begin
 	delete from [BlogpostCategoryLink]
 	delete from [Blogpost]
 	delete from [Category]
+end
+go
+
+-- ************************************************ User Login and Register ************************************************
+create or alter proc [tryLogIn]
+(
+	@Alias nvarchar(max),
+    @PasswordPlain nvarchar(max),
+	
+	@Exists bit output,
+	@IsAdmin bit output
+)
+as
+begin
+	declare @TheRealLoginID int
+	set  @TheRealLoginID =
+	(
+		select top 1 u.[IDLogin]
+		from [Login] as u
+		where u.[Alias] = @Alias and u.[PasswordPlain] = @PasswordPlain
+	)
+	
+	set @Exists = 0
+	set @IsAdmin = 0
+
+	if (@TheRealLoginID is not null)
+	begin
+		set @Exists = 1
+
+		if (@TheRealLoginID in (select a.[LoginID] from [Administrator] as a))
+		begin
+			set @IsAdmin = 1
+		end
+	end
+end
+go
+
+create or alter proc [tryRegister]
+(
+	@Alias nvarchar(max),
+    @PasswordPlain nvarchar(max),
+	
+	@Success bit output
+)
+as
+begin
+	set @Success = 0
+
+	if (@Alias not in (select l.[Alias] from [Login] as l))
+	begin
+		insert into [Login]([Alias], [PasswordPlain])
+		values
+		(@Alias, @PasswordPlain)
+
+		set @Success = 1
+	end
 end
 go
