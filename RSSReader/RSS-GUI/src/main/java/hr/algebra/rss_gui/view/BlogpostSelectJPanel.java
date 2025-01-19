@@ -10,7 +10,7 @@ import hr.algebra.factory.UrlConnectionFactory;
 import hr.algebra.rss_gui.RSS_GUI;
 import hr.algebra.rss_gui.view.model.BlogpostTableModel;
 import hr.algebra.utilities.FileUtils;
-import hr.algebra.utilities.MessageUtils;
+import hr.algebra.utilities.swing.MessageUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;

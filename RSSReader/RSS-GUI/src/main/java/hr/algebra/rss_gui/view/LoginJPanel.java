@@ -5,7 +5,7 @@
 package hr.algebra.rss_gui.view;
 
 import hr.algebra.rss_gui.RSS_GUI;
-import hr.algebra.rss_gui.validation.GenericValidators;
+import hr.algebra.utilities.swing.SomewhatSmartValidator;
 import model.repo.user.Login;
 
 /**
@@ -15,6 +15,8 @@ import model.repo.user.Login;
 public class LoginJPanel extends javax.swing.JPanel {
     
     private final RSS_GUI parentForm;
+    
+    private final SomewhatSmartValidator validator = new SomewhatSmartValidator();
 
     /**
      * Creates new form LoginJPanel
@@ -27,8 +29,8 @@ public class LoginJPanel extends javax.swing.JPanel {
     }
     
     private void initValidation(){
-        GenericValidators.attachNotBlankValidator(tfAlias, lblAliasError);
-        GenericValidators.attachNotBlankValidator(pfPassword, lblPasswordError);
+        validator.attachNotBlankValidator(tfAlias, lblAliasError, "Alias cannot be blank.");
+        validator.attachNotBlankValidator(pfPassword, lblPasswordError, "Password cannot be blank.");
     }
 
     /**
@@ -44,10 +46,10 @@ public class LoginJPanel extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         tfAlias = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnLogIn = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         pfPassword = new javax.swing.JPasswordField();
-        jButton2 = new javax.swing.JButton();
+        btnRegister = new javax.swing.JButton();
         lblAliasError = new javax.swing.JLabel();
         lblPasswordError = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -65,19 +67,19 @@ public class LoginJPanel extends javax.swing.JPanel {
 
         jLabel2.setText("Alias");
 
-        jButton1.setText("Log In");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnLogIn.setText("Log In");
+        btnLogIn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnLogInActionPerformed(evt);
             }
         });
 
         jLabel3.setText("Password");
 
-        jButton2.setText("Register Instead");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnRegister.setText("Register Instead");
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnRegisterActionPerformed(evt);
             }
         });
 
@@ -94,7 +96,7 @@ public class LoginJPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnLogIn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -105,7 +107,7 @@ public class LoginJPanel extends javax.swing.JPanel {
                         .addComponent(pfPassword)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblPasswordError))
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+                    .addComponent(btnRegister, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -124,9 +126,9 @@ public class LoginJPanel extends javax.swing.JPanel {
                     .addComponent(pfPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblPasswordError))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addComponent(btnLogIn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(btnRegister)
                 .addGap(92, 92, 92))
         );
 
@@ -216,22 +218,26 @@ public class LoginJPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnLogInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogInActionPerformed
+        if (!validator.verify()){
+            return;
+        }
+        
         Login login = new Login();
         login.alias = tfAlias.getText();
         login.password = new String(pfPassword.getPassword());
         
         parentForm.loginLogInAttempt(login);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnLogInActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         parentForm.showRegister();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnRegisterActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnLogIn;
+    private javax.swing.JButton btnRegister;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JMenuItem jMenuItem1;

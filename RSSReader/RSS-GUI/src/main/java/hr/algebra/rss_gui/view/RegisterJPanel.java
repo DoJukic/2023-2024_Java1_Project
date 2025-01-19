@@ -5,6 +5,8 @@
 package hr.algebra.rss_gui.view;
 
 import hr.algebra.rss_gui.RSS_GUI;
+import hr.algebra.utilities.swing.SomewhatSmartValidator;
+import model.repo.user.Login;
 
 /**
  *
@@ -13,6 +15,8 @@ import hr.algebra.rss_gui.RSS_GUI;
 public class RegisterJPanel extends javax.swing.JPanel {
     
     private final RSS_GUI parentForm;
+    
+    private final SomewhatSmartValidator validator = new SomewhatSmartValidator();
 
     /**
      * Creates new form RegisterJPanel
@@ -20,6 +24,16 @@ public class RegisterJPanel extends javax.swing.JPanel {
     public RegisterJPanel(RSS_GUI parent) {
         parentForm = parent;
         initComponents();
+        initValidation();
+    }
+    
+    private void initValidation(){
+        validator.attachNotBlankValidator(tfAlias, lblErrorAlias, "Alias cannot be blank.");
+        validator.attachNotBlankValidator(pfPasswordOne, lblErrorPasswordOne, "Password cannot be blank.");
+        validator.attachCustomValidator(pfPasswordTwo, lblErrorPasswordTwo, "Passwords must match.",
+                () -> {
+                    return !(new String(pfPasswordTwo.getPassword()).equals(new String(pfPasswordOne.getPassword())));
+                });
     }
 
     /**
@@ -33,12 +47,15 @@ public class RegisterJPanel extends javax.swing.JPanel {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        tfAlias = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnConfirmRegister = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
-        jPasswordField2 = new javax.swing.JPasswordField();
+        pfPasswordTwo = new javax.swing.JPasswordField();
+        pfPasswordOne = new javax.swing.JPasswordField();
+        lblErrorAlias = new javax.swing.JLabel();
+        lblErrorPasswordOne = new javax.swing.JLabel();
+        lblErrorPasswordTwo = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -48,14 +65,28 @@ public class RegisterJPanel extends javax.swing.JPanel {
 
         jLabel1.setText("Confirm Password");
 
-        jTextField2.setToolTipText("");
+        tfAlias.setToolTipText("");
 
-        jLabel2.setText("Email");
+        jLabel2.setText("Alias");
 
-        jButton1.setText("Register");
-        jButton1.setToolTipText("");
+        btnConfirmRegister.setText("Register");
+        btnConfirmRegister.setToolTipText("");
+        btnConfirmRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmRegisterActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Password");
+
+        lblErrorAlias.setForeground(new java.awt.Color(255, 51, 51));
+        lblErrorAlias.setText("!");
+
+        lblErrorPasswordOne.setForeground(new java.awt.Color(255, 0, 0));
+        lblErrorPasswordOne.setText("!");
+
+        lblErrorPasswordTwo.setForeground(new java.awt.Color(255, 0, 0));
+        lblErrorPasswordTwo.setText("!");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -64,13 +95,22 @@ public class RegisterJPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField2)
+                    .addComponent(btnConfirmRegister, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPasswordField1)
-                    .addComponent(jPasswordField2))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(tfAlias)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblErrorAlias))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(pfPasswordOne)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblErrorPasswordOne))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(pfPasswordTwo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblErrorPasswordTwo)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -79,17 +119,23 @@ public class RegisterJPanel extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tfAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblErrorAlias))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pfPasswordOne, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblErrorPasswordOne))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pfPasswordTwo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblErrorPasswordTwo))
                 .addGap(12, 12, 12)
-                .addComponent(jButton1)
+                .addComponent(btnConfirmRegister)
                 .addContainerGap())
         );
 
@@ -178,9 +224,20 @@ public class RegisterJPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnConfirmRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmRegisterActionPerformed
+        if (!validator.verify())
+            return;
+        
+        Login login = new Login();
+        login.alias = tfAlias.getText();
+        login.password = new String(pfPasswordOne.getPassword());
+        
+        parentForm.registerRegisterAttempt(login);
+    }//GEN-LAST:event_btnConfirmRegisterActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnConfirmRegister;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -189,8 +246,11 @@ public class RegisterJPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JPasswordField jPasswordField2;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JLabel lblErrorAlias;
+    private javax.swing.JLabel lblErrorPasswordOne;
+    private javax.swing.JLabel lblErrorPasswordTwo;
+    private javax.swing.JPasswordField pfPasswordOne;
+    private javax.swing.JPasswordField pfPasswordTwo;
+    private javax.swing.JTextField tfAlias;
     // End of variables declaration//GEN-END:variables
 }

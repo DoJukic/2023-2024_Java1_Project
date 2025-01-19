@@ -11,7 +11,7 @@ import hr.algebra.rss_gui.view.DataEditJPanel;
 import hr.algebra.rss_gui.view.DataViewJPanel;
 import hr.algebra.rss_gui.view.LoginJPanel;
 import hr.algebra.rss_gui.view.RegisterJPanel;
-import hr.algebra.utilities.MessageUtils;
+import hr.algebra.utilities.swing.MessageUtils;
 import hr.algebra.utilities.SynchronousAsynchronousWorker;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -115,8 +115,9 @@ public class RSS_GUI extends javax.swing.JFrame {
         rebuildTabs();
     }
     
-    public Boolean registerRegisterAttempt(Login login){
-        return false;
+    public void registerRegisterAttempt(Login login){
+        MessageUtils.showInformationMessage("REGISTER ATTEMPT!", login.alias);
+        hideRegister();
     }
     
     public void blogpostSelectBlogpostSelectedView(Blogpost blogpost){
