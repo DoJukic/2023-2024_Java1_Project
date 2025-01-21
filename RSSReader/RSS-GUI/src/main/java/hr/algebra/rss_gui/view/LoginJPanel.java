@@ -6,6 +6,7 @@ package hr.algebra.rss_gui.view;
 
 import hr.algebra.rss_gui.RSS_GUI;
 import hr.algebra.utilities.swing.SomewhatSmartValidator;
+import java.awt.event.KeyEvent;
 import model.repo.user.Login;
 
 /**
@@ -26,11 +27,23 @@ public class LoginJPanel extends javax.swing.JPanel {
         
         initComponents();
         initValidation();
+        
+        tfAlias.setToolTipText(null); // Oops
+    }
+    
+    public void configLoginButtonEnabled(boolean state){
+        btnLogIn.setEnabled(state);
     }
     
     private void initValidation(){
         validator.attachNotBlankValidator(tfAlias, lblAliasError, "Alias cannot be blank.");
         validator.attachNotBlankValidator(pfPassword, lblPasswordError, "Password cannot be blank.");
+    }
+    
+    private void checkEnter(KeyEvent evt){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+            btnLogInActionPerformed(null);
+        }
     }
 
     /**
@@ -64,6 +77,11 @@ public class LoginJPanel extends javax.swing.JPanel {
         jPanel1.setMinimumSize(new java.awt.Dimension(250, 250));
 
         tfAlias.setToolTipText("");
+        tfAlias.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tfAliasKeyReleased(evt);
+            }
+        });
 
         jLabel2.setText("Alias");
 
@@ -75,6 +93,12 @@ public class LoginJPanel extends javax.swing.JPanel {
         });
 
         jLabel3.setText("Password");
+
+        pfPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                pfPasswordKeyReleased(evt);
+            }
+        });
 
         btnRegister.setText("Register Instead");
         btnRegister.addActionListener(new java.awt.event.ActionListener() {
@@ -96,7 +120,6 @@ public class LoginJPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnLogIn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -104,10 +127,12 @@ public class LoginJPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblAliasError))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(pfPassword)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnRegister, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                            .addComponent(btnLogIn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pfPassword))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblPasswordError))
-                    .addComponent(btnRegister, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+                        .addComponent(lblPasswordError)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -233,6 +258,14 @@ public class LoginJPanel extends javax.swing.JPanel {
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         parentForm.showRegister();
     }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private void pfPasswordKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pfPasswordKeyReleased
+        checkEnter(evt);
+    }//GEN-LAST:event_pfPasswordKeyReleased
+
+    private void tfAliasKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfAliasKeyReleased
+        checkEnter(evt);
+    }//GEN-LAST:event_tfAliasKeyReleased
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

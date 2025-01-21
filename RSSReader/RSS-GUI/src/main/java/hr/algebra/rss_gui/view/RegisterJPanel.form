@@ -71,7 +71,6 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="btnConfirmRegister" max="32767" attributes="0"/>
                       <Component id="jLabel1" alignment="0" pref="238" max="32767" attributes="0"/>
                       <Component id="jLabel2" alignment="0" max="32767" attributes="0"/>
                       <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
@@ -85,8 +84,11 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblErrorPasswordOne" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="pfPasswordTwo" max="32767" attributes="0"/>
+                      <Group type="102" alignment="1" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="btnConfirmRegister" alignment="0" max="32767" attributes="0"/>
+                              <Component id="pfPasswordTwo" max="32767" attributes="0"/>
+                          </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblErrorPasswordTwo" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -136,6 +138,9 @@
           <Properties>
             <Property name="toolTipText" type="java.lang.String" value=""/>
           </Properties>
+          <Events>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="pfPasswordOneKeyReleased"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel2">
           <Properties>
@@ -157,8 +162,14 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JPasswordField" name="pfPasswordTwo">
+          <Events>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="pfPasswordOneKeyReleased"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JPasswordField" name="pfPasswordOne">
+          <Events>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="pfPasswordOneKeyReleased"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblErrorAlias">
           <Properties>

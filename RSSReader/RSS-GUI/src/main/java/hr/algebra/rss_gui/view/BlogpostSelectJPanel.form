@@ -65,9 +65,9 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblWorkerStatus" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jbtnFetchNew" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnFetchNew" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jbtnConfirmSelection" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnConfirmSelection" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -77,8 +77,8 @@
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jbtnConfirmSelection" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jbtnFetchNew" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnConfirmSelection" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnFetchNew" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblWorkerStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -87,20 +87,20 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="jbtnConfirmSelection">
+        <Component class="javax.swing.JButton" name="btnConfirmSelection">
           <Properties>
             <Property name="text" type="java.lang.String" value="Confirm Selection"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jbtnConfirmSelectionActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnConfirmSelectionActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="jbtnFetchNew">
+        <Component class="javax.swing.JButton" name="btnFetchNew">
           <Properties>
             <Property name="text" type="java.lang.String" value="Clear And Fetch From Web"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jbtnFetchNewActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnFetchNewActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblWorkerStatus">

@@ -39,6 +39,7 @@ public class SqlRepository implements IRepository {
     private static final String SELECT_BLOGPOST = "{ CALL selectBlogpost (?) }";
     private static final String SELECT_BLOGPOST_CATEGORIES = "{ CALL selectBlogpostCategories (?) }";
     private static final String SELECT_BLOGPOSTS = "{ CALL selectBlogposts }";
+    private static final String SELECT_CATEGORIES = "{ CALL selectCategories }";
     
     private static final String DELETE_BLOGPOST = "{ CALL deleteBlogpost (?) }";
     private static final String DELETE_ALL_BLOGPOST_DATA = "{ CALL deleteAllBlogpostData }";
@@ -127,8 +128,7 @@ public class SqlRepository implements IRepository {
                 stmt.setString(ENCODED_CONTENT, blogpost.encodedContent);
 
                 stmt.setString(IMAGE_PATH, blogpost.imagePath);
-
-                stmt.registerOutParameter(BLOGPOST_ID, Types.INTEGER);
+                
                 stmt.executeUpdate();
             }
         
@@ -223,6 +223,26 @@ public class SqlRepository implements IRepository {
         }
         
         return blogposts;
+    }
+
+    @Override
+    public List<Category> selectCategories() throws Exception {
+        List<Category> categories = new ArrayList<>();
+        
+        DataSource dataSource = DataSourceSingleton.getInstance();
+        try(Connection con = dataSource.getConnection();
+                CallableStatement stmt = con.prepareCall(SELECT_CATEGORIES);) {
+            
+            try(ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Category cat = new Category();
+                    cat.name = rs.getString(CATEGORY_NAME);
+                    categories.add(cat);
+                }
+            }
+        }
+        
+        return categories;
     }
     
 

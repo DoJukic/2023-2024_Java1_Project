@@ -114,6 +114,15 @@ begin
 end
 go
 
+create or alter proc [selectCategories]
+as
+begin
+	select
+		cat.Name as 'CategoryName'
+	from [Category] as cat
+end
+go
+
 create or alter proc [selectBlogpost]
 (
 	@BlogpostID int

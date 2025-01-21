@@ -6,6 +6,7 @@ package hr.algebra.utilities.swing;
 
 import hr.algebra.utilities.swing.MessageUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +29,7 @@ public class SomewhatSmartValidator {
     public boolean verify(){
         for (int i = 0; i < components.size(); i++){
             if (!components.get(i).getInputVerifier().verify(components.get(i))){
-                MessageUtils.showErrorMessage("Input error", errorMessages.get(i));
+                MessageUtils.showErrorMessage("Input Error", errorMessages.get(i));
                 return false;
             }
         }
@@ -37,25 +38,31 @@ public class SomewhatSmartValidator {
     }
     
     public void attachCustomValidator(JComponent component, JLabel errorLabel, String errorMessage, Callable<Boolean> failCondition){
-        final String WARN_TEXT = errorLabel.getText();
+        final String warnText = errorLabel.getText();
+        
+        String emptyTextTemp = "";
+        for (var i = 0; i < warnText.length(); i++)
+            emptyTextTemp += " ";
+        
+        final String emptyText = emptyTextTemp;
         
         components.add(component);
         errorMessages.add(errorMessage);
         
-        errorLabel.setText("");
+        errorLabel.setText(emptyText);
         component.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
                 try {
                     if (failCondition.call()){
-                        errorLabel.setText(WARN_TEXT);
+                        errorLabel.setText(warnText);
                         return false;
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(SomewhatSmartValidator.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                errorLabel.setText("");
+                errorLabel.setText(emptyText);
                 return true;
             }
             

@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,7 +52,13 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     public static final String DEFAULT_IMAGE_NAME = "_default_image";
     
     private final RSS_GUI parentForm;
-    private long jTableBlogpostDisplayLastMouseClicked = 0;
+    
+    private boolean isAdmin = false;
+    
+    private long jTableBlogpostDisplayLastMouseClickedTime = 0;
+    private long jTableBlogpostDisplayLastMouseClickedX = -1111111110;
+    private long jTableBlogpostDisplayLastMouseClickedY = -1111111110;
+    private long jTableBlogpostDisplayLastSelectedIndex = -1111111110;
 
     /**
      * Creates new form DataSourceSelectJPanel
@@ -62,6 +67,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         this.parentForm = parent;
         initComponents();
         
+        configIsAdmin(false);
         setEmptyModel();
         
         parentForm.SyncAsyncWorker.subscribeToTaskEnded_ThreadWarn(() -> {
@@ -70,16 +76,34 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             });
         });
         
+        loadDataFromDB();
+        
+        jTableBlogpostDisplay.setAutoCreateRowSorter(true);
+    }
+    
+    public void loadDataFromDB(){  
         parentForm.SyncAsyncWorker.addTask(() -> {
             asyncLoadDataFromDB();
         });
-        
-        jTableBlogpostDisplay.setAutoCreateRowSorter(true);
     }
     
     private void setEmptyModel(){
         BlogpostTableModel model = new BlogpostTableModel(new ArrayList<Blogpost>());
         this.jTableBlogpostDisplay.setModel(model);
+    }
+    
+    public void configIsAdmin(boolean isAdmin){
+        this.isAdmin = isAdmin;
+        performStateLogic();
+    }
+    
+    private void performStateLogic(){
+        if (isAdmin){
+            btnFetchNew.setEnabled(true);
+            return;
+        }
+        
+        btnFetchNew.setEnabled(false);
     }
     
     public void asyncLoadDataFromDB(){
@@ -105,7 +129,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         parentForm.SyncAsyncWorker.cancelNonRunningTasks();
         
         if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
-            MessageUtils.showInformationMessage("Notice", "The program is still processing, please hold.");
+            MessageUtils.showInformationMessage("Notice", "The program is still processing, please hold. Additional tasks will be cancelled if possible.");
         }
         
         ArrayList<link> links = new ArrayList<>();
@@ -133,9 +157,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             }
         });
         
-        parentForm.SyncAsyncWorker.addTask(() -> {
-            this.asyncLoadDataFromDB();
-        });
+        loadDataFromDB();
         
         parentForm.SyncAsyncWorker.addTask(() -> {
             this.asyncFetchAllPossibleFeeds(links);
@@ -145,9 +167,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             this.asyncLoadProvidedFeeds(links);
         });
         
-        parentForm.SyncAsyncWorker.addTask(() -> {
-            this.asyncLoadDataFromDB();
-        });
+        loadDataFromDB();
     }
     
     private void asyncFetchAllPossibleFeeds(List<link> links){
@@ -277,7 +297,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         }
         BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();
         
-        parentForm.blogpostSelectBlogpostSelectedView(model.getTheActualThingyPls(selectedIndex));
+        parentForm.blogpostSelectBlogpostSelectedView(model.getTheActualThingyPls(selectedIndex).id);
     }
 
     /**
@@ -292,8 +312,8 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableBlogpostDisplay = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
-        jbtnConfirmSelection = new javax.swing.JButton();
-        jbtnFetchNew = new javax.swing.JButton();
+        btnConfirmSelection = new javax.swing.JButton();
+        btnFetchNew = new javax.swing.JButton();
         lblWorkerStatus = new javax.swing.JLabel();
 
         jTableBlogpostDisplay.setModel(new javax.swing.table.DefaultTableModel(
@@ -315,17 +335,17 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableBlogpostDisplay);
 
-        jbtnConfirmSelection.setText("Confirm Selection");
-        jbtnConfirmSelection.addActionListener(new java.awt.event.ActionListener() {
+        btnConfirmSelection.setText("Confirm Selection");
+        btnConfirmSelection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnConfirmSelectionActionPerformed(evt);
+                btnConfirmSelectionActionPerformed(evt);
             }
         });
 
-        jbtnFetchNew.setText("Clear And Fetch From Web");
-        jbtnFetchNew.addActionListener(new java.awt.event.ActionListener() {
+        btnFetchNew.setText("Clear And Fetch From Web");
+        btnFetchNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnFetchNewActionPerformed(evt);
+                btnFetchNewActionPerformed(evt);
             }
         });
 
@@ -337,9 +357,9 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(lblWorkerStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbtnFetchNew)
+                .addComponent(btnFetchNew)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbtnConfirmSelection)
+                .addComponent(btnConfirmSelection)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -347,8 +367,8 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jbtnConfirmSelection)
-                    .addComponent(jbtnFetchNew)
+                    .addComponent(btnConfirmSelection)
+                    .addComponent(btnFetchNew)
                     .addComponent(lblWorkerStatus))
                 .addContainerGap())
         );
@@ -375,31 +395,38 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jbtnFetchNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnFetchNewActionPerformed
+    private void btnFetchNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchNewActionPerformed
         loadDataFromWeb();
-    }//GEN-LAST:event_jbtnFetchNewActionPerformed
+    }//GEN-LAST:event_btnFetchNewActionPerformed
 
     private void jTableBlogpostDisplayMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableBlogpostDisplayMouseClicked
         long now = Instant.now().toEpochMilli();
         
-        if (now - jTableBlogpostDisplayLastMouseClicked > 400){
-            jTableBlogpostDisplayLastMouseClicked = now;
+        if (now - jTableBlogpostDisplayLastMouseClickedTime > 400
+                || Math.abs(jTableBlogpostDisplayLastMouseClickedX - evt.getX()) > 20
+                || Math.abs(jTableBlogpostDisplayLastMouseClickedY - evt.getY()) > 20
+                || jTableBlogpostDisplayLastSelectedIndex != jTableBlogpostDisplay.getSelectedRow()){
+            
+            jTableBlogpostDisplayLastMouseClickedTime = now;
+            jTableBlogpostDisplayLastMouseClickedX = evt.getX();
+            jTableBlogpostDisplayLastMouseClickedY = evt.getY();
+            jTableBlogpostDisplayLastSelectedIndex = jTableBlogpostDisplay.getSelectedRow();
         }else{
             jTableBlogpostDisplaySelectedConfirmed();
         }
     }//GEN-LAST:event_jTableBlogpostDisplayMouseClicked
 
-    private void jbtnConfirmSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnConfirmSelectionActionPerformed
+    private void btnConfirmSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmSelectionActionPerformed
         jTableBlogpostDisplaySelectedConfirmed();
-    }//GEN-LAST:event_jbtnConfirmSelectionActionPerformed
+    }//GEN-LAST:event_btnConfirmSelectionActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConfirmSelection;
+    private javax.swing.JButton btnFetchNew;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTableBlogpostDisplay;
-    private javax.swing.JButton jbtnConfirmSelection;
-    private javax.swing.JButton jbtnFetchNew;
     private javax.swing.JLabel lblWorkerStatus;
     // End of variables declaration//GEN-END:variables
 }

@@ -7,6 +7,7 @@ package dal;
 import java.util.List;
 import java.util.Optional;
 import model.repo.blogpost.Blogpost;
+import model.repo.blogpost.Category;
 import model.repo.user.Login;
 import model.repo.user.UserInfo;
 
@@ -22,6 +23,7 @@ public interface IRepository {
     void deleteAllBlogpostData() throws Exception;
     Optional<Blogpost> selectBlogpost(int id) throws Exception;
     List<Blogpost> selectBlogpostsNoCategory() throws Exception;
+    List<Category> selectCategories() throws Exception;
     
     boolean tryRegister(Login login) throws Exception;
     Optional<UserInfo> tryLogin(Login login) throws Exception;

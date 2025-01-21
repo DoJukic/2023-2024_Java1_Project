@@ -6,6 +6,7 @@ package hr.algebra.rss_gui.view;
 
 import hr.algebra.rss_gui.RSS_GUI;
 import hr.algebra.utilities.swing.SomewhatSmartValidator;
+import java.awt.event.KeyEvent;
 import model.repo.user.Login;
 
 /**
@@ -34,6 +35,16 @@ public class RegisterJPanel extends javax.swing.JPanel {
                 () -> {
                     return !(new String(pfPasswordTwo.getPassword()).equals(new String(pfPasswordOne.getPassword())));
                 });
+    }
+    
+    private void checkEnter(KeyEvent evt){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+            btnConfirmRegisterActionPerformed(null);
+        }
+    }
+    
+    public void configRegisterButtonEnabled(boolean state){
+        btnConfirmRegister.setEnabled(state);
     }
 
     /**
@@ -66,6 +77,11 @@ public class RegisterJPanel extends javax.swing.JPanel {
         jLabel1.setText("Confirm Password");
 
         tfAlias.setToolTipText("");
+        tfAlias.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                pfPasswordOneKeyReleased(evt);
+            }
+        });
 
         jLabel2.setText("Alias");
 
@@ -78,6 +94,18 @@ public class RegisterJPanel extends javax.swing.JPanel {
         });
 
         jLabel3.setText("Password");
+
+        pfPasswordTwo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                pfPasswordOneKeyReleased(evt);
+            }
+        });
+
+        pfPasswordOne.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                pfPasswordOneKeyReleased(evt);
+            }
+        });
 
         lblErrorAlias.setForeground(new java.awt.Color(255, 51, 51));
         lblErrorAlias.setText("!");
@@ -95,7 +123,6 @@ public class RegisterJPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnConfirmRegister, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -107,8 +134,10 @@ public class RegisterJPanel extends javax.swing.JPanel {
                         .addComponent(pfPasswordOne)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblErrorPasswordOne))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(pfPasswordTwo)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnConfirmRegister, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pfPasswordTwo))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblErrorPasswordTwo)))
                 .addContainerGap())
@@ -234,6 +263,11 @@ public class RegisterJPanel extends javax.swing.JPanel {
         
         parentForm.registerRegisterAttempt(login);
     }//GEN-LAST:event_btnConfirmRegisterActionPerformed
+    
+    // This is actually linked to all the buttons, I honestly don't want to know how to rename these.
+    private void pfPasswordOneKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pfPasswordOneKeyReleased
+        checkEnter(evt);
+    }//GEN-LAST:event_pfPasswordOneKeyReleased
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

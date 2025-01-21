@@ -27,5 +27,8 @@ public class MessageUtils {
     public static boolean showConfirmDialog(String title, String message) {
         return JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE) == JOptionPane.OK_OPTION;
     }
-
+    
+    public static String showInputDialog(String message){
+        return JOptionPane.showInputDialog(null, message);
+    }
 }
