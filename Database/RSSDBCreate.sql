@@ -1,4 +1,7 @@
+create database StarsectorBlogpostRSSDB
+go
 use StarsectorBlogpostRSSDB
+go
 
 CREATE TABLE [Login]
 (

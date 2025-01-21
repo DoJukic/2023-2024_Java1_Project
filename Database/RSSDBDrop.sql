@@ -1,2 +1,1 @@
-use StarsectorBlogpostRSSDB
-
+drop database StarsectorBlogpostRSSDB

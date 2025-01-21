@@ -293,6 +293,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     private void jTableBlogpostDisplaySelectedConfirmed(){
         int selectedIndex = jTableBlogpostDisplay.getSelectedRow();
         if (selectedIndex < 0){
+            MessageUtils.showErrorMessage("Error", "Nothing has been selected.");
             return;
         }
         BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();

@@ -74,7 +74,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
         try {
             img = ImageIO.read(new File(blogpost.imagePath));
             
-            Image scaledImage = img.getScaledInstance(550, 200, Image.SCALE_SMOOTH);
+            Image scaledImage = img.getScaledInstance(lblImage.getMinimumSize().width, lblImage.getMinimumSize().height, Image.SCALE_SMOOTH);
 
             lblImage.setIcon(new ImageIcon(scaledImage));
             lblImage.setText("");
@@ -93,7 +93,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
         ArrayList<String> allCategories = new ArrayList();
         for (var cat : categories)
             allCategories.add(cat.name);
-        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesAll, allCategories);
+        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesAll, new ArrayList(allCategories));
         
         if (blogpost.categories.isEmpty())
             return;
@@ -101,8 +101,8 @@ public class DataEditJPanel extends javax.swing.JPanel {
         ArrayList<String> currentCategories = new ArrayList();
         for (var cat : blogpost.categories.get())
             currentCategories.add(cat.name);
-        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesEdit, currentCategories);
-        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesView, currentCategories);
+        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesEdit, new ArrayList(currentCategories));
+        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesView, new ArrayList(currentCategories));
     }
     
     public void setSaveBusyStatus(boolean isBusy){
@@ -146,13 +146,13 @@ public class DataEditJPanel extends javax.swing.JPanel {
         PnlCategoriesEdit = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        lsCategoriesEdit = new javax.swing.JList<>();
-        jScrollPane6 = new javax.swing.JScrollPane();
-        lsCategoriesAll = new javax.swing.JList<>();
         btnCategoryCreate = new javax.swing.JButton();
         btnCategoryAdd = new javax.swing.JButton();
         btnCategoryRemove = new javax.swing.JButton();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        lsCategoriesAll = new javax.swing.JList<>();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        lsCategoriesEdit = new javax.swing.JList<>();
         pnlCategoriesView = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -196,6 +196,8 @@ public class DataEditJPanel extends javax.swing.JPanel {
 
         lblImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblImage.setText("IMAGE_HERE");
+        lblImage.setMaximumSize(new java.awt.Dimension(511, 201));
+        lblImage.setMinimumSize(new java.awt.Dimension(510, 200));
 
         tfImagePath.setEditable(false);
         tfImagePath.setText("IMAGE_PATH_HERE");
@@ -204,11 +206,6 @@ public class DataEditJPanel extends javax.swing.JPanel {
 
         tfTitle.setEditable(false);
         tfTitle.setText("TITLE_HERE");
-        tfTitle.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                tfTitlePropertyChange(evt);
-            }
-        });
 
         jLabel3.setText("Link");
 
@@ -222,7 +219,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
 
         jLabel5.setText("Description");
 
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         epDescription.setEditable(false);
@@ -231,7 +228,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
 
         jLabel6.setText("Content");
 
-        jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane3.setMinimumSize(new java.awt.Dimension(16, 60));
 
@@ -244,26 +241,14 @@ public class DataEditJPanel extends javax.swing.JPanel {
         pnlCategories.setMinimumSize(new java.awt.Dimension(100, 180));
 
         jLabel8.setText("Categories");
+        jLabel8.setMaximumSize(new java.awt.Dimension(200, 16));
+        jLabel8.setMinimumSize(new java.awt.Dimension(200, 16));
+        jLabel8.setPreferredSize(new java.awt.Dimension(200, 16));
 
         jLabel9.setText("All Categories");
-
-        lsCategoriesEdit.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        lsCategoriesEdit.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        lsCategoriesEdit.setDragEnabled(true);
-        jScrollPane5.setViewportView(lsCategoriesEdit);
-
-        lsCategoriesAll.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        lsCategoriesAll.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        lsCategoriesAll.setDragEnabled(true);
-        jScrollPane6.setViewportView(lsCategoriesAll);
+        jLabel9.setMaximumSize(new java.awt.Dimension(200, 16));
+        jLabel9.setMinimumSize(new java.awt.Dimension(200, 16));
+        jLabel9.setPreferredSize(new java.awt.Dimension(200, 16));
 
         btnCategoryCreate.setText("Create");
         btnCategoryCreate.addActionListener(new java.awt.event.ActionListener() {
@@ -286,50 +271,78 @@ public class DataEditJPanel extends javax.swing.JPanel {
             }
         });
 
+        jScrollPane7.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        lsCategoriesAll.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        lsCategoriesAll.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lsCategoriesAll.setMaximumSize(new java.awt.Dimension(199, 90));
+        lsCategoriesAll.setMinimumSize(new java.awt.Dimension(199, 90));
+        jScrollPane7.setViewportView(lsCategoriesAll);
+
+        lsCategoriesEdit.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        lsCategoriesEdit.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane6.setViewportView(lsCategoriesEdit);
+
         javax.swing.GroupLayout PnlCategoriesEditLayout = new javax.swing.GroupLayout(PnlCategoriesEdit);
         PnlCategoriesEdit.setLayout(PnlCategoriesEditLayout);
         PnlCategoriesEditLayout.setHorizontalGroup(
             PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
                 .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
+                    .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane6)))
                 .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
+                        .addGap(19, 19, 19)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
                     .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnCategoryCreate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnCategoryAdd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnCategoryRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane7)))
+                .addGap(18, 18, 18)
+                .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(btnCategoryAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCategoryRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnCategoryCreate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
         PnlCategoriesEditLayout.setVerticalGroup(
             PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
-                .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel9))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnCategoryCreate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnCategoryAdd)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnCategoryRemove))
+                    .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
+                        .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCategoryRemove))))
+                        .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel7.setText("Categories");
 
+        jScrollPane4.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
         lsCategoriesView.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "A", "BC", "DEF", "ABCDEF" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -361,7 +374,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
         pnlCategoriesLayout.setVerticalGroup(
             pnlCategoriesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlCategoriesLayout.createSequentialGroup()
-                .addComponent(PnlCategoriesEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(PnlCategoriesEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlCategoriesView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -416,7 +429,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -427,17 +440,19 @@ public class DataEditJPanel extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -518,7 +533,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
         if (!categoryNames.contains(value))
             categoryNames.add(value);
         
-        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesEdit, categoryNames);
+        MiscUtils.assignSimpleStringListModelToJList(lsCategoriesEdit, new ArrayList(categoryNames));
     }//GEN-LAST:event_btnCategoryAddActionPerformed
 
     private void btnCategoryRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCategoryRemoveActionPerformed
@@ -538,6 +553,13 @@ public class DataEditJPanel extends javax.swing.JPanel {
     private void btnCategoryCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCategoryCreateActionPerformed
         String catName = MessageUtils.showInputDialog("Please input the category's name.");
         
+        if (catName == null)
+            return;
+        
+        if (catName.strip() == ""){
+            MessageUtils.showErrorMessage("Input Error", "Category cannot be blank.");
+        }
+        
         List<String> categoryEditNames = MiscUtils.getStringListFromStringModel(lsCategoriesEdit.getModel());
         if (!categoryEditNames.contains(catName))
             categoryEditNames.add(catName);
@@ -548,10 +570,6 @@ public class DataEditJPanel extends javax.swing.JPanel {
             categoryAllNames.add(catName);
         MiscUtils.assignSimpleStringListModelToJList(lsCategoriesAll, categoryAllNames);
     }//GEN-LAST:event_btnCategoryCreateActionPerformed
-
-    private void tfTitlePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_tfTitlePropertyChange
-        return; //damn
-    }//GEN-LAST:event_tfTitlePropertyChange
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -578,8 +596,8 @@ public class DataEditJPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JLabel lblImage;
     private javax.swing.JList<String> lsCategoriesAll;
     private javax.swing.JList<String> lsCategoriesEdit;

@@ -1,0 +1,9 @@
+RSSDBInsertAdmins.sql needed
+
+Admin:
+Alias "asd"
+Pass "dsa"
+
+user:
+Alias: "user"
+Pass: "user"
