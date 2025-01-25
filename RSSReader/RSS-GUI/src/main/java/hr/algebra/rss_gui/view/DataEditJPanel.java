@@ -80,6 +80,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
         epContent.setEditable(isAdmin);
         
         btnSave.setEnabled(isAdmin ? (!sysIsBusy ? !isNew : false) : false);
+        btnDelete.setEnabled(isAdmin ? (!sysIsBusy ? !isNew : false) : false);
         btnCreateNew.setEnabled(isAdmin ? !sysIsBusy : false);
     }
     
@@ -256,6 +257,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
 
         epDescription.setEditable(false);
         epDescription.setText("DESC_HERE");
+        epDescription.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane2.setViewportView(epDescription);
 
         jLabel6.setText("Content");
@@ -330,9 +332,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
             .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
                 .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
-                    .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane6)))
+                    .addComponent(jScrollPane6))
                 .addGroup(PnlCategoriesEditLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(PnlCategoriesEditLayout.createSequentialGroup()
                         .addGap(19, 19, 19)

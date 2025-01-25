@@ -100,10 +100,12 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     private void performStateLogic(){
         if (isAdmin){
             btnFetchNew.setEnabled(true);
+            btnCreateNew.setEnabled(true);
             return;
         }
         
         btnFetchNew.setEnabled(false);
+        btnCreateNew.setEnabled(false);
     }
     
     public void asyncLoadDataFromDB(){
@@ -291,14 +293,16 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     }
 
     private void jTableBlogpostDisplaySelectedConfirmed(){
-        int selectedIndex = jTableBlogpostDisplay.getSelectedRow();
-        if (selectedIndex < 0){
+        // https://stackoverflow.com/questions/29345792/java-jtable-getting-the-data-of-the-selected-row - MadMike's comment on Damilola Fagoyinbo's post
+        int viewIndex = jTableBlogpostDisplay.getSelectedRow();
+        if (viewIndex < 0){
             MessageUtils.showErrorMessage("Error", "Nothing has been selected.");
             return;
         }
-        BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();
+        int modelIndex = jTableBlogpostDisplay.convertRowIndexToModel(viewIndex);
         
-        parentForm.setBlogpostDisplay(Optional.of(model.getTheActualThingyPls(selectedIndex).id));
+        BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();
+        parentForm.setBlogpostDisplay(Optional.of(model.getTheActualThingyPls(modelIndex).id));
     }
 
     /**
@@ -344,7 +348,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             }
         });
 
-        btnFetchNew.setText("Clear And Fetch From Web");
+        btnFetchNew.setText("Clear And Fetch");
         btnFetchNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFetchNewActionPerformed(evt);
@@ -365,7 +369,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblWorkerStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(43, 43, 43)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnFetchNew)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnConfirmSelection)
@@ -377,11 +381,12 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnConfirmSelection)
-                    .addComponent(btnFetchNew)
-                    .addComponent(lblWorkerStatus)
-                    .addComponent(btnCreateNew))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblWorkerStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnConfirmSelection)
+                        .addComponent(btnFetchNew)
+                        .addComponent(btnCreateNew)))
                 .addContainerGap())
         );
 
@@ -393,7 +398,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
