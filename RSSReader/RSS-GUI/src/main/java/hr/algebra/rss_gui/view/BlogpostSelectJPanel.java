@@ -298,7 +298,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         }
         BlogpostTableModel model = (BlogpostTableModel)jTableBlogpostDisplay.getModel();
         
-        parentForm.blogpostSelectBlogpostSelectedView(model.getTheActualThingyPls(selectedIndex).id);
+        parentForm.setBlogpostDisplay(Optional.of(model.getTheActualThingyPls(selectedIndex).id));
     }
 
     /**
@@ -316,6 +316,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         btnConfirmSelection = new javax.swing.JButton();
         btnFetchNew = new javax.swing.JButton();
         lblWorkerStatus = new javax.swing.JLabel();
+        btnCreateNew = new javax.swing.JButton();
 
         jTableBlogpostDisplay.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -350,6 +351,13 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             }
         });
 
+        btnCreateNew.setText("Create New");
+        btnCreateNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateNewActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -357,10 +365,12 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblWorkerStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(43, 43, 43)
                 .addComponent(btnFetchNew)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnConfirmSelection)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCreateNew)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -370,7 +380,8 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnConfirmSelection)
                     .addComponent(btnFetchNew)
-                    .addComponent(lblWorkerStatus))
+                    .addComponent(lblWorkerStatus)
+                    .addComponent(btnCreateNew))
                 .addContainerGap())
         );
 
@@ -421,9 +432,14 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         jTableBlogpostDisplaySelectedConfirmed();
     }//GEN-LAST:event_btnConfirmSelectionActionPerformed
 
+    private void btnCreateNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateNewActionPerformed
+        parentForm.setBlogpostDisplay(Optional.empty());
+    }//GEN-LAST:event_btnCreateNewActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConfirmSelection;
+    private javax.swing.JButton btnCreateNew;
     private javax.swing.JButton btnFetchNew;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;

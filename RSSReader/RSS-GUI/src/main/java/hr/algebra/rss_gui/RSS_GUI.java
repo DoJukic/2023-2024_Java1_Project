@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -188,26 +189,54 @@ public class RSS_GUI extends javax.swing.JFrame {
         dataEditPanel.configIsAdmin(isAdmin);
     }
 
-    public void blogpostSelectBlogpostSelectedView(int blogpostID){
+    public void setBlogpostDisplay(Optional<Integer> optBlogpostID){
+        if (optBlogpostID.isPresent()){
+            int blogpostID = optBlogpostID.get();
+            
+            SyncAsyncWorker.addTask(() -> {
+                IRepository repository = RepositoryFactory.getInstance();
+
+                try {
+                    List<Category> categories = repository.selectCategories();
+                    Optional<Blogpost> blogpostFull = repository.selectBlogpost(blogpostID);
+
+                    SwingUtilities.invokeLater(() ->{
+                        if (blogpostFull.isEmpty()){
+                            MessageUtils.showErrorMessage("Display Failed", "Blogpost no longer exists?");
+                            return;
+                        }
+
+                        dataEditVisible = true;
+                        dataEditPanel.loadDisplay(blogpostFull, categories);
+                        rebuildTabs();
+                        jtpMain.setSelectedComponent(dataEditPanel);
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
+
+                    SwingUtilities.invokeLater(() ->{
+                        MessageUtils.showErrorMessage("Display Failed", "Database fault :(");
+                    });
+                }
+            });
+            return;
+        }
+            
         SyncAsyncWorker.addTask(() -> {
             IRepository repository = RepositoryFactory.getInstance();
-            
+
             try {
                 List<Category> categories = repository.selectCategories();
-                Optional<Blogpost> blogpostFull = repository.selectBlogpost(blogpostID);
-                
+
                 SwingUtilities.invokeLater(() ->{
-                    if (blogpostFull.isEmpty())
-                        MessageUtils.showErrorMessage("Display Failed", "Blogpost no longer exists?");
-                    
                     dataEditVisible = true;
-                    dataEditPanel.loadDisplay(blogpostFull.get(), categories);
+                    dataEditPanel.loadDisplay(Optional.empty(), categories);
                     rebuildTabs();
                     jtpMain.setSelectedComponent(dataEditPanel);
                 });
             } catch (Exception ex) {
                 Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
-                
+
                 SwingUtilities.invokeLater(() ->{
                     MessageUtils.showErrorMessage("Display Failed", "Database fault :(");
                 });
@@ -216,8 +245,6 @@ public class RSS_GUI extends javax.swing.JFrame {
     }
 
     public void dataEditPanelSaveInitiated(Blogpost blogpost){
-        dataEditPanel.setSaveBusyStatus(true);
-         
         SyncAsyncWorker.addTask(() -> {
             IRepository repository = RepositoryFactory.getInstance();
             try {
@@ -226,17 +253,61 @@ public class RSS_GUI extends javax.swing.JFrame {
                 Logger.getLogger(DataEditJPanel.class.getName()).log(Level.SEVERE, null, ex);
                 
                 SwingUtilities.invokeLater(() ->{
-                    MessageUtils.showErrorMessage("Login Failed", "Database fault :(");
+                    MessageUtils.showErrorMessage("Blogpost Edit Failed", "Database fault :(");
                 });
             }
             
             SwingUtilities.invokeLater(() ->{
-                dataEditPanel.setSaveBusyStatus(false);
-                
                 // refresh!
                 if (dataEditPanel.getCurrentDisplayedBlogpostID() == blogpost.id){
-                    blogpostSelectBlogpostSelectedView(blogpost.id);
+                    setBlogpostDisplay(Optional.of(blogpost.id));
                 }
+                dataSelectPanel.loadDataFromDB();
+            });
+        });
+    }
+
+    public void dataEditPanelCreateNewInitiated(Blogpost blogpost){
+        SyncAsyncWorker.addTask(() -> {
+            IRepository repository = RepositoryFactory.getInstance();
+            try {
+                blogpost.id = repository.createBlogpost(blogpost);
+            } catch (Exception ex) {
+                Logger.getLogger(DataEditJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                
+                SwingUtilities.invokeLater(() ->{
+                    MessageUtils.showErrorMessage("Blogpost Creation Failed", "Database fault :(");
+                });
+            }
+            
+            SwingUtilities.invokeLater(() ->{
+                // refresh!
+                setBlogpostDisplay(Optional.of(blogpost.id));
+                dataSelectPanel.loadDataFromDB();
+            });
+        });
+    }
+
+    public void dataEditPanelDeleteInitiated(int blogpostID){
+        SyncAsyncWorker.addTask(() -> {
+            IRepository repository = RepositoryFactory.getInstance();
+            try {
+                repository.deleteBlogpost(blogpostID);
+            } catch (Exception ex) {
+                Logger.getLogger(DataEditJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                
+                SwingUtilities.invokeLater(() ->{
+                    MessageUtils.showErrorMessage("Blogpost Deletion Failed", "Database fault :(");
+                });
+            }
+            
+            SwingUtilities.invokeLater(() ->{
+                if (dataEditPanel.getCurrentDisplayedBlogpostID() == blogpostID){
+                    dataEditVisible = false;
+                    rebuildTabs();
+                    jtpMain.setSelectedComponent(dataSelectPanel);
+                }
+                
                 dataSelectPanel.loadDataFromDB();
             });
         });

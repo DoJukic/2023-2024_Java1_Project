@@ -17,12 +17,12 @@ public class Blogpost {
     public static final DateTimeFormatter DATE_OFFSET_FORMATTER
             = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     
-    public int id;
-    public String title;
-    public String link;
-    public OffsetDateTime datePublished;
-    public String description;
-    public String encodedContent;
-    public String imagePath;
+    public int id = -1;
+    public String title = "";
+    public String link = "";
+    public OffsetDateTime datePublished = OffsetDateTime.now();;
+    public String description = "";
+    public String encodedContent = "";
+    public String imagePath = "";
     public Optional<List<Category>> categories = Optional.empty();
 }

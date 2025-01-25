@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 import model.repo.blogpost.Blogpost;
 import model.repo.blogpost.Category;
 
@@ -33,18 +34,36 @@ public class DataEditJPanel extends javax.swing.JPanel {
     int currentBlogpostID = -1;
     
     boolean isAdmin = false;
-    boolean saveIsBusy = false;
+    boolean isNew = false;
+    boolean sysIsBusy = false;
     
     public DataEditJPanel(RSS_GUI parentForm) {
         initComponents();
         
         this.parentForm = parentForm;
         
+        parentForm.SyncAsyncWorker.subscribeToTaskStarted_ThreadWarn(() -> {
+            SwingUtilities.invokeLater(() -> {
+                setSystemBusyStatus(true);
+            });
+        });
+        
+        parentForm.SyncAsyncWorker.subscribeToAllTasksEnded_ThreadWarn(() -> {
+            SwingUtilities.invokeLater(() -> {
+                setSystemBusyStatus(false);
+            });
+        });
+        
         MiscUtils.fixScrolling(jScrollPane1);
     }
     
     public void configIsAdmin(boolean isAdmin){
         this.isAdmin = isAdmin;
+        refresh();
+    }
+    
+    private void configIsNew(boolean isNew){
+        this.isNew = isNew;
         refresh();
     }
     
@@ -60,10 +79,22 @@ public class DataEditJPanel extends javax.swing.JPanel {
         epDescription.setEditable(isAdmin);
         epContent.setEditable(isAdmin);
         
-        btnSave.setEnabled(isAdmin ? !saveIsBusy : false);
+        btnSave.setEnabled(isAdmin ? (!sysIsBusy ? !isNew : false) : false);
+        btnCreateNew.setEnabled(isAdmin ? !sysIsBusy : false);
     }
     
-    public void loadDisplay(Blogpost blogpost, List<Category> categories){
+    public void loadDisplay(Optional<Blogpost> optBlogpost, List<Category> categories){
+        Blogpost blogpost;
+        
+        if (optBlogpost.isPresent()){
+            blogpost = optBlogpost.get();
+            configIsNew(false);
+        }else{
+            blogpost = new Blogpost();
+            blogpost.id = -1;
+            configIsNew(true);
+        }
+        
         currentBlogpostID = blogpost.id;
         
         lblImage.setText("IMAGE_ERROR");
@@ -95,18 +126,17 @@ public class DataEditJPanel extends javax.swing.JPanel {
             allCategories.add(cat.name);
         MiscUtils.assignSimpleStringListModelToJList(lsCategoriesAll, new ArrayList(allCategories));
         
-        if (blogpost.categories.isEmpty())
-            return;
-        
         ArrayList<String> currentCategories = new ArrayList();
-        for (var cat : blogpost.categories.get())
-            currentCategories.add(cat.name);
+        if (blogpost.categories.isPresent())
+            for (var cat : blogpost.categories.get())
+                currentCategories.add(cat.name);
+        
         MiscUtils.assignSimpleStringListModelToJList(lsCategoriesEdit, new ArrayList(currentCategories));
         MiscUtils.assignSimpleStringListModelToJList(lsCategoriesView, new ArrayList(currentCategories));
     }
     
-    public void setSaveBusyStatus(boolean isBusy){
-        this.saveIsBusy = isBusy;
+    public void setSystemBusyStatus(boolean isBusy){
+        this.sysIsBusy = isBusy;
         refresh();
     }
     
@@ -158,6 +188,8 @@ public class DataEditJPanel extends javax.swing.JPanel {
         jScrollPane4 = new javax.swing.JScrollPane();
         lsCategoriesView = new javax.swing.JList<>();
         btnSave = new javax.swing.JButton();
+        btnCreateNew = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(600, 400));
         setPreferredSize(new java.awt.Dimension(600, 1000));
@@ -465,6 +497,20 @@ public class DataEditJPanel extends javax.swing.JPanel {
             }
         });
 
+        btnCreateNew.setText("Create New");
+        btnCreateNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateNewActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -472,7 +518,11 @@ public class DataEditJPanel extends javax.swing.JPanel {
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnCreateNew)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDelete)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -480,14 +530,23 @@ public class DataEditJPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 965, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSave)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSave)
+                    .addComponent(btnCreateNew)
+                    .addComponent(btnDelete))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        if (currentBlogpostID < 0){
+            MessageUtils.showErrorMessage("Blogpost Does Not Exist", "cannot save a non-existent blogpost. Create a new one instead.");
+            return;
+        }
+        
         if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
             MessageUtils.showErrorMessage("Program Busy", "An operation is currently running, please try again once it is complete.");
+            return;
         }
         
         Blogpost blogpost = new Blogpost();
@@ -571,12 +630,64 @@ public class DataEditJPanel extends javax.swing.JPanel {
         MiscUtils.assignSimpleStringListModelToJList(lsCategoriesAll, categoryAllNames);
     }//GEN-LAST:event_btnCategoryCreateActionPerformed
 
+    private void btnCreateNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateNewActionPerformed
+        if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
+            MessageUtils.showErrorMessage("Program Busy", "An operation is currently running, please try again once it is complete.");
+        }
+        
+        Blogpost blogpost = new Blogpost();
+        blogpost.id = -1;
+        blogpost.imagePath = tfImagePath.getText();
+        blogpost.title = tfTitle.getText();
+        blogpost.link = tfLink.getText();
+        try{
+            blogpost.datePublished = OffsetDateTime.parse(tfDate.getText(), Blogpost.DATE_OFFSET_FORMATTER);
+        }catch(Exception e){
+            MessageUtils.showErrorMessage("Bad Date", "You have provided an invalid date. There is no saving this.");
+            return;
+        }
+        blogpost.description = epDescription.getText();
+        blogpost.encodedContent = epContent.getText();
+        
+        // https://stackoverflow.com/questions/1816673/how-do-i-check-if-a-file-exists-in-java
+        File f = Paths.get(blogpost.imagePath).toFile();
+        if(!f.canRead())
+            if (!MessageUtils.showConfirmDialog("Are you sure?", "It doesn't look like the image exists, are you sure you wish to proceed?"))
+                return;
+        
+        var cats = new ArrayList<Category>();
+        for(var i = 0; i < lsCategoriesEdit.getModel().getSize(); i++){
+            Category cat = new Category();
+            cat.name = lsCategoriesEdit.getModel().getElementAt(i);
+            cats.add(cat);
+        }
+        blogpost.categories = Optional.of(cats);
+        
+        parentForm.dataEditPanelCreateNewInitiated(blogpost);
+    }//GEN-LAST:event_btnCreateNewActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        if (currentBlogpostID < 0){
+            MessageUtils.showErrorMessage("Blogpost Does Not Exist", "cannot save a non-existent blogpost. Create a new one instead.");
+            return;
+        }
+        
+        if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
+            MessageUtils.showErrorMessage("Program Busy", "An operation is currently running, please try again once it is complete.");
+            return;
+        }
+        
+        parentForm.dataEditPanelDeleteInitiated(currentBlogpostID);
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel PnlCategoriesEdit;
     private javax.swing.JButton btnCategoryAdd;
     private javax.swing.JButton btnCategoryCreate;
     private javax.swing.JButton btnCategoryRemove;
+    private javax.swing.JButton btnCreateNew;
+    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnSave;
     private javax.swing.JEditorPane epContent;
     private javax.swing.JEditorPane epDescription;

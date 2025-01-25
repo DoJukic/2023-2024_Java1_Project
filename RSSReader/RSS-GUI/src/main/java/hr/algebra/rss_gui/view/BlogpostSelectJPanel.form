@@ -64,10 +64,12 @@
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblWorkerStatus" max="32767" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
                   <Component id="btnFetchNew" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnConfirmSelection" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="btnCreateNew" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -80,6 +82,7 @@
                       <Component id="btnConfirmSelection" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnFetchNew" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblWorkerStatus" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnCreateNew" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -104,6 +107,14 @@
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblWorkerStatus">
+        </Component>
+        <Component class="javax.swing.JButton" name="btnCreateNew">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Create New"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateNewActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

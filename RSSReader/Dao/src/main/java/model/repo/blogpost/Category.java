@@ -9,5 +9,5 @@ package model.repo.blogpost;
  * @author Domi
  */
 public class Category {
-    public String name;
+    public String name = "";
 }
