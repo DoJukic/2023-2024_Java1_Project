@@ -54,6 +54,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     private final RSS_GUI parentForm;
     
     private boolean isAdmin = false;
+    boolean sysIsBusy = false;
     
     private long jTableBlogpostDisplayLastMouseClickedTime = 0;
     private long jTableBlogpostDisplayLastMouseClickedX = -1111111110;
@@ -69,6 +70,18 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         
         configIsAdmin(false);
         setEmptyModel();
+        
+        parentForm.SyncAsyncWorker.subscribeToTaskStarted_ThreadWarn(() -> {
+            SwingUtilities.invokeLater(() ->{
+                this.configIsSysBusy(true);
+            });
+        });
+        
+        parentForm.SyncAsyncWorker.subscribeToAllTasksEnded_ThreadWarn(() -> {
+            SwingUtilities.invokeLater(() ->{
+                this.configIsSysBusy(false);
+            });
+        });
         
         parentForm.SyncAsyncWorker.subscribeToTaskEnded_ThreadWarn(() -> {
             SwingUtilities.invokeLater(() ->{
@@ -97,15 +110,28 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         performStateLogic();
     }
     
+    public void configIsSysBusy(boolean isBusy){
+        this.sysIsBusy = isBusy;
+        performStateLogic();
+    }
+    
     private void performStateLogic(){
-        if (isAdmin){
-            btnFetchNew.setEnabled(true);
-            btnCreateNew.setEnabled(true);
-            return;
+        boolean btnFetchNewEnabled = true;
+        boolean btnCreateNewEnabled = true;
+        boolean btnConfirmSelectionEnabed = true;
+        
+        if (sysIsBusy){
+            btnFetchNewEnabled = false;
+            btnCreateNewEnabled = false;
+            btnConfirmSelectionEnabed = false;
+        } else if ((!isAdmin)){
+            btnFetchNewEnabled = false;
+            btnCreateNewEnabled = false;
         }
         
-        btnFetchNew.setEnabled(false);
-        btnCreateNew.setEnabled(false);
+        btnFetchNew.setEnabled(btnFetchNewEnabled);
+        btnCreateNew.setEnabled(btnCreateNewEnabled);
+        btnConfirmSelection.setEnabled(btnConfirmSelectionEnabed);
     }
     
     public void asyncLoadDataFromDB(){
