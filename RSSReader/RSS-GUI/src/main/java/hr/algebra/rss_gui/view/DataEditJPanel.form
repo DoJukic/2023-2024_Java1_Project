@@ -472,6 +472,7 @@
                                   </StringArray>
                                 </Property>
                                 <Property name="selectionMode" type="int" value="0"/>
+                                <Property name="dragEnabled" type="boolean" value="true"/>
                                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                                   <Dimension value="[199, 90]"/>
                                 </Property>
@@ -504,6 +505,7 @@
                                   </StringArray>
                                 </Property>
                                 <Property name="selectionMode" type="int" value="0"/>
+                                <Property name="dragEnabled" type="boolean" value="true"/>
                               </Properties>
                               <AuxValues>
                                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>

@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import model.repo.blogpost.Blogpost;
@@ -313,6 +314,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
             public String getElementAt(int i) { return strings[i]; }
         });
         lsCategoriesAll.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lsCategoriesAll.setDragEnabled(true);
         lsCategoriesAll.setMaximumSize(new java.awt.Dimension(199, 90));
         lsCategoriesAll.setMinimumSize(new java.awt.Dimension(199, 90));
         jScrollPane7.setViewportView(lsCategoriesAll);
@@ -323,6 +325,7 @@ public class DataEditJPanel extends javax.swing.JPanel {
             public String getElementAt(int i) { return strings[i]; }
         });
         lsCategoriesEdit.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        lsCategoriesEdit.setDragEnabled(true);
         jScrollPane6.setViewportView(lsCategoriesEdit);
 
         javax.swing.GroupLayout PnlCategoriesEditLayout = new javax.swing.GroupLayout(PnlCategoriesEdit);

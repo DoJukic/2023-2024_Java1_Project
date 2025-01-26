@@ -76,15 +76,19 @@ public class SynchronousAsynchronousWorker {
     private void tryRunNextTask(){
         synchronized(operationsLock){
             if (!todo.isEmpty()){
-                var task = todo.getFirst();
-                ForkJoinPool.commonPool().execute(() ->{
-                    task.run();
-                    taskFinished();
-                });
-                todo.removeFirst();
-                taskStarted();
+                runNextTask();
             }
         }
+    }
+    
+    private void runNextTask(){
+        var task = todo.getFirst();
+        ForkJoinPool.commonPool().execute(() ->{
+            task.run();
+            taskFinished();
+        });
+        todo.removeFirst();
+        taskStarted();
     }
     
     public Boolean getAllTasksFinished(){
@@ -111,12 +115,12 @@ public class SynchronousAsynchronousWorker {
                 listener.notifiedTaskComplete();
             }
             
-            if (todo.size() <= 0){
+            if (todo.isEmpty()){
                 for (var listener : allTasksCompleteListeners){
                     listener.notifiedTasksComplete();
                 }
             }else{
-                tryRunNextTask();
+                runNextTask();
             }
         }
     }
