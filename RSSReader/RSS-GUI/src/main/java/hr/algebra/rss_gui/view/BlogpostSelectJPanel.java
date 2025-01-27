@@ -121,7 +121,6 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         boolean btnConfirmSelectionEnabed = true;
         
         if (sysIsBusy){
-            btnFetchNewEnabled = false;
             btnCreateNewEnabled = false;
             btnConfirmSelectionEnabed = false;
         } else if ((!isAdmin)){
@@ -154,7 +153,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
     }
     
     public void loadDataFromWeb(){
-        parentForm.SyncAsyncWorker.cancelNonRunningTasks();
+        parentForm.SyncAsyncWorker.cancelAllTasks();
         
         if (!parentForm.SyncAsyncWorker.getAllTasksFinished()){
             MessageUtils.showInformationMessage("Notice", "The program is still processing, please hold. Additional tasks will be cancelled if possible.");
@@ -177,7 +176,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
                 repo.deleteAllBlogpostData();
             } catch (Exception ex) {
                 Logger.getLogger(BlogpostSelectJPanel.class.getName()).log(Level.SEVERE, null, ex);
-                parentForm.SyncAsyncWorker.cancelNonRunningTasks();
+                parentForm.SyncAsyncWorker.cancelAllTasks();
             
                 SwingUtilities.invokeLater(() ->{
                     MessageUtils.showErrorMessage("Alert", "Could not flush repository.");
@@ -238,6 +237,10 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         }
     }
     
+    // Java handicapped lambdas somewhat (because they're afraid of multithreading [as they should be probably]). We're just gonna sidestep that.
+    private class BoolHolder{
+        Boolean bool = false;
+    }
     private void asyncLoadProvidedFeeds(List<link> links){
         try{
             // https://stackoverflow.com/questions/9909465/how-to-disable-dtd-fetching-using-jaxb2-0 (Graham Leggett's answer)
@@ -255,6 +258,9 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
             FileUtils.copyFromUrl("https://fractalsoftworks.com/wp-content/uploads/2017/06/comsec_redacted.jpg", defaultImageDir);
             
             for (int i = 0; i < linksReversed.size(); i++){
+                if (parentForm.SyncAsyncWorker.getIsStopping())
+                    return;
+                
                 var link = linksReversed.get(i);
                 
                 int indexSend = i + 1;
@@ -278,7 +284,7 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
 
                         bp.title = item.title;
                         bp.link = item.link;
-                        bp.datePublished = OffsetDateTime.parse(item.pubDate, DateTimeFormatter.RFC_1123_DATE_TIME);
+                        bp.datePublished = OffsetDateTime.parse(item.pubDate, item.INBOUND_DATE_FORMATTER);
                         bp.description = item.description;
                         bp.encodedContent = item.contentEncoded;
                         

@@ -34,6 +34,8 @@ public class SynchronousAsynchronousWorker {
     private final ArrayList<OneTaskCompleteListener> oneTaskCompleteListeners = new ArrayList<>();
     private final ArrayList<AllTasksCompleteListener> allTasksCompleteListeners = new ArrayList<>();
     
+    private boolean isStopping = false;
+    
     public void addTask(Runnable runnable){
         synchronized(operationsLock){
             todo.add(runnable);
@@ -41,9 +43,22 @@ public class SynchronousAsynchronousWorker {
         }
     }
     
-    public void cancelNonRunningTasks(){
+    // Intended primarily for checking if we're cancelling stuff or no.
+    public void runSynchronized(Runnable runnable){
+        synchronized(operationsLock){
+            runnable.run();
+        }
+    }
+    public boolean getIsStopping(){
+        synchronized(operationsLock){
+            return isStopping;
+        }
+    }
+    
+    public void cancelAllTasks(){
         synchronized(operationsLock){
             todo.clear();
+            isStopping = true;
         }
     }
     
@@ -110,6 +125,7 @@ public class SynchronousAsynchronousWorker {
     private void taskFinished(){
         synchronized(operationsLock){
             operationsRunning = false;
+            isStopping = false;
             
             for (var listener : oneTaskCompleteListeners){
                 listener.notifiedTaskComplete();

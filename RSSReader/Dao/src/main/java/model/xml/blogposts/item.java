@@ -4,11 +4,13 @@
  */
 package model.xml.blogposts;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -16,6 +18,9 @@ import javax.xml.bind.annotation.XmlElement;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class item {
+    @XmlTransient
+    public static DateTimeFormatter INBOUND_DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
+    
     @XmlElement
     public String title;
     @XmlElement

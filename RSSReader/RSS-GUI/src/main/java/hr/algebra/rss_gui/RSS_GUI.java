@@ -15,12 +15,14 @@ import hr.algebra.rss_gui.view.DataEditJPanel;
 import hr.algebra.rss_gui.view.DataViewJPanel;
 import hr.algebra.rss_gui.view.LoginJPanel;
 import hr.algebra.rss_gui.view.RegisterJPanel;
+import hr.algebra.utilities.FileUtils;
 import hr.algebra.utilities.swing.MessageUtils;
 import hr.algebra.utilities.SynchronousAsynchronousWorker;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.StringReader;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,15 +30,28 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.FileChooserUI;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import model.repo.blogpost.Blogpost;
 import model.repo.blogpost.Category;
 import model.repo.user.Login;
 import model.repo.user.UserInfo;
+import model.xml.blogposts.blogposts;
+import model.xml.blogposts.item;
+import model.xml.blogposts.rss;
+import org.xml.sax.InputSource;
 
 /**
  *
@@ -294,7 +309,7 @@ public class RSS_GUI extends javax.swing.JFrame {
             try {
                 repository.deleteBlogpost(blogpostID);
             } catch (Exception ex) {
-                Logger.getLogger(DataEditJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
                 
                 SwingUtilities.invokeLater(() ->{
                     MessageUtils.showErrorMessage("Blogpost Deletion Failed", "Database fault :(");
@@ -325,6 +340,9 @@ public class RSS_GUI extends javax.swing.JFrame {
         jtpMain = new javax.swing.JTabbedPane();
         jMenuBarMain = new javax.swing.JMenuBar();
         menuThemes = new javax.swing.JMenu();
+        jMenu1 = new javax.swing.JMenu();
+        miExport = new javax.swing.JMenuItem();
+        miStopBackgroundTasks = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Starsector Blog RSS Parser");
@@ -335,6 +353,26 @@ public class RSS_GUI extends javax.swing.JFrame {
 
         menuThemes.setText("Select Theme");
         jMenuBarMain.add(menuThemes);
+
+        jMenu1.setText("Miscellaneous");
+
+        miExport.setText("Export to File");
+        miExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miExportActionPerformed(evt);
+            }
+        });
+        jMenu1.add(miExport);
+
+        miStopBackgroundTasks.setText("Stop Background Tasks");
+        miStopBackgroundTasks.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miStopBackgroundTasksActionPerformed(evt);
+            }
+        });
+        jMenu1.add(miStopBackgroundTasks);
+
+        jMenuBarMain.add(jMenu1);
 
         setJMenuBar(jMenuBarMain);
 
@@ -352,6 +390,79 @@ public class RSS_GUI extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void miExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miExportActionPerformed
+        if (!SyncAsyncWorker.getAllTasksFinished()){
+            MessageUtils.showErrorMessage("Program Busy", "The program is currently busy, please try again later.");
+            return;
+        }
+        
+        final JFileChooser fc = new JFileChooser();
+        
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("XML (.xml)", "xml"));
+        fc.setFileFilter(fc.getChoosableFileFilters()[0]);
+        
+        int returnVal = fc.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file;
+            try {
+                file = new File(fc.getSelectedFile().getCanonicalPath() + "." + ((FileNameExtensionFilter) fc.getFileFilter()).getExtensions()[0]);
+            } catch (Exception ex) {
+                Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
+                
+                MessageUtils.showErrorMessage("Saving to File Failed", "Unknown error. Sorry.");
+                return;
+            }
+            
+            SyncAsyncWorker.addTask(() -> {
+                IRepository repository = RepositoryFactory.getInstance();
+
+                try {
+                    // This is horrible. I am sorry. So much data...
+                    List<Blogpost> blogposts = repository.selectBlogpostsNoCategory();
+                    blogposts blogpostsToBeMarshalled = new blogposts();
+                    blogpostsToBeMarshalled.item = new ArrayList<>();
+
+                    for (var blogpost : blogposts){
+                        Blogpost blogpostFull = repository.selectBlogpost(blogpost.id).get();
+                        item itemToAdd = new item();
+
+                        itemToAdd.title = blogpostFull.title;
+                        itemToAdd.link = blogpostFull.link;
+                        itemToAdd.pubDate = blogpostFull.datePublished.format(item.INBOUND_DATE_FORMATTER);
+                        itemToAdd.link = blogpostFull.link;
+
+                        itemToAdd.category = new ArrayList<String>();
+                        for (var cat : blogpostFull.categories.get()){
+                            itemToAdd.category.add(cat.name);
+                        }
+
+                        itemToAdd.description = blogpostFull.description;
+                        itemToAdd.contentEncoded = blogpostFull.encodedContent;
+
+                        blogpostsToBeMarshalled.item.add(itemToAdd);
+                    }
+
+                    JAXBContext jc = JAXBContext.newInstance(blogposts.class);
+                    Marshaller marshaller = jc.createMarshaller();
+
+                    marshaller.marshal(blogpostsToBeMarshalled, file);
+
+                } catch (Exception ex) {
+                    Logger.getLogger(RSS_GUI.class.getName()).log(Level.SEVERE, null, ex);
+
+                    SwingUtilities.invokeLater(() -> {
+                        MessageUtils.showErrorMessage("Saving to File Failed", "Unknown error. Sorry.");
+                    });
+                }
+            });
+        }
+    }//GEN-LAST:event_miExportActionPerformed
+
+    private void miStopBackgroundTasksActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miStopBackgroundTasksActionPerformed
+        SyncAsyncWorker.cancelAllTasks();
+    }//GEN-LAST:event_miStopBackgroundTasksActionPerformed
 
     /**
      * @param args the command line arguments
@@ -407,9 +518,12 @@ public class RSS_GUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBarMain;
     private javax.swing.JTabbedPane jtpMain;
     private javax.swing.JMenu menuThemes;
+    private javax.swing.JMenuItem miExport;
+    private javax.swing.JMenuItem miStopBackgroundTasks;
     // End of variables declaration//GEN-END:variables
 
 }
