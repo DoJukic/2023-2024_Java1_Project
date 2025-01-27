@@ -499,7 +499,7 @@ public class RSS_GUI extends javax.swing.JFrame {
             System.err.println( "Failed to initialize LaF" );
         }
         
-        List<LookAndFeelInfo> lafInfoList = new ArrayList<LookAndFeelInfo>(Arrays.asList(UIManager.getInstalledLookAndFeels()));
+        List<LookAndFeelInfo> lafInfoList = new ArrayList<>(Arrays.asList(UIManager.getInstalledLookAndFeels()));
         
         LookAndFeelInfo lafInfo = new LookAndFeelInfo(FlatLightLaf.NAME, FlatLightLaf.class.getName());
         lafInfoList.add(lafInfo);

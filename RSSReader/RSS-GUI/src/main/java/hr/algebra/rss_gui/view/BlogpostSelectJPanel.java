@@ -123,7 +123,9 @@ public class BlogpostSelectJPanel extends javax.swing.JPanel {
         if (sysIsBusy){
             btnCreateNewEnabled = false;
             btnConfirmSelectionEnabed = false;
-        } else if ((!isAdmin)){
+        }
+        
+        if ((!isAdmin)){
             btnFetchNewEnabled = false;
             btnCreateNewEnabled = false;
         }
