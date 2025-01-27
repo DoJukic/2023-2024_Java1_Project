@@ -506,8 +506,8 @@ public class RSS_GUI extends javax.swing.JFrame {
         lafInfo = new LookAndFeelInfo(FlatDarkLaf.NAME, FlatDarkLaf.class.getName());
         lafInfoList.add(lafInfo);
         
-        LookAndFeelInfo[] shtifuck = {};
-        UIManager.setInstalledLookAndFeels(lafInfoList.toArray(shtifuck));
+        LookAndFeelInfo[] lafs = {};
+        UIManager.setInstalledLookAndFeels(lafInfoList.toArray(lafs));
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
